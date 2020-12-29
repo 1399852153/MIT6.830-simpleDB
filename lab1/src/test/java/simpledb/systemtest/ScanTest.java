@@ -1,8 +1,14 @@
 package simpledb.systemtest;
 
-import simpledb.systemtest.SystemTestUtil;
-
-import static org.junit.Assert.*;
+import org.junit.Test;
+import simpledb.model.*;
+import simpledb.model.page.Page;
+import simpledb.model.pageid.PageId;
+import simpledb.util.BufferPool;
+import simpledb.exception.DbException;
+import simpledb.exception.TransactionAbortedException;
+import simpledb.model.dbfile.HeapFile;
+import simpledb.util.Utility;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,9 +16,8 @@ import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-import org.junit.Test;
-
-import simpledb.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Dumps the contents of a table.

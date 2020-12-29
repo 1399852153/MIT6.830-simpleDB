@@ -1,17 +1,20 @@
 package simpledb;
 
-import static org.junit.Assert.assertEquals;
+import junit.framework.Assert;
+import junit.framework.JUnit4TestAdapter;
+import org.junit.Before;
+import org.junit.Test;
+import simpledb.TestUtil.SkeletonFile;
+import simpledb.model.Database;
+import simpledb.model.TupleDesc;
+import simpledb.model.dbfile.DbFile;
+import simpledb.systemtest.SimpleDbTestBase;
+import simpledb.systemtest.SystemTestUtil;
+import simpledb.util.Utility;
 
 import java.util.NoSuchElementException;
 
-import junit.framework.Assert;
-import junit.framework.JUnit4TestAdapter;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import simpledb.systemtest.SimpleDbTestBase;
-import simpledb.systemtest.SystemTestUtil;
+import static org.junit.Assert.assertEquals;
 
 public class CatalogTest extends SimpleDbTestBase {
     private static String name = "test";
@@ -20,8 +23,8 @@ public class CatalogTest extends SimpleDbTestBase {
     @Before public void addTables() throws Exception {
         Database.getCatalog().clear();
 		nameThisTestRun = SystemTestUtil.getUUID();
-        Database.getCatalog().addTable(new TestUtil.SkeletonFile(-1, Utility.getTupleDesc(2)), nameThisTestRun);
-        Database.getCatalog().addTable(new TestUtil.SkeletonFile(-2, Utility.getTupleDesc(2)), name);
+        Database.getCatalog().addTable(new SkeletonFile(-1, Utility.getTupleDesc(2)), nameThisTestRun);
+        Database.getCatalog().addTable(new SkeletonFile(-2, Utility.getTupleDesc(2)), name);
     }
 
     /**

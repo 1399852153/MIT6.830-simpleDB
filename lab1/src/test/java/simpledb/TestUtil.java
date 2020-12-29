@@ -1,9 +1,27 @@
 package simpledb;
 
-import java.io.*;
-import java.util.*;
+import simpledb.enums.Type;
+import simpledb.exception.DbException;
+import simpledb.exception.TransactionAbortedException;
+import simpledb.model.*;
+import simpledb.model.dbfile.DbFile;
+import simpledb.model.dbfile.HeapFile;
+import simpledb.model.field.Field;
+import simpledb.model.field.IntField;
+import simpledb.model.field.StringField;
+import simpledb.model.page.Page;
+import simpledb.model.pageid.PageId;
+import simpledb.util.Utility;
 
-import static org.junit.Assert.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class TestUtil {
     /**
@@ -69,7 +87,7 @@ public class TestUtil {
                 Field f;
                 Object t = tupdata[i++];
                 if (t instanceof String)
-                    f = new StringField((String)t, Type.STRING_LEN); 
+                    f = new StringField((String)t, Type.STRING_LEN);
                 else
                     f = new IntField((Integer)t);
 
@@ -202,6 +220,7 @@ public class TestUtil {
             this.td = td;
         }
 
+        @Override
         public Page readPage(PageId id) throws NoSuchElementException {
             throw new RuntimeException("not implemented");
         }
@@ -210,17 +229,18 @@ public class TestUtil {
             throw new RuntimeException("not implemented");
         }
 
+        @Override
         public void writePage(Page p) throws IOException {
             throw new RuntimeException("not implemented");
         }
 
-        public ArrayList<Page> insertTuple(TransactionId tid, Tuple t)
-            throws DbException, IOException, TransactionAbortedException {
+        @Override
+        public ArrayList<Page> insertTuple(TransactionId tid, Tuple t) {
             throw new RuntimeException("not implemented");
         }
 
-        public Page deleteTuple(TransactionId tid, Tuple t)
-            throws DbException, TransactionAbortedException {
+        @Override
+        public Page deleteTuple(TransactionId tid, Tuple t) {
             throw new RuntimeException("not implemented");
         }
 
@@ -228,14 +248,17 @@ public class TestUtil {
             throw new RuntimeException("not implemented");
         }
 
+        @Override
         public int getId() {
             return tableid;
         }
 
+        @Override
         public DbFileIterator iterator(TransactionId tid) {
             throw new RuntimeException("not implemented");
         }
 
+        @Override
 		public TupleDesc getTupleDesc() {			
 			return td;
 		}
@@ -259,16 +282,20 @@ public class TestUtil {
             this.cur = low;
         }
 
+        @Override
         public void open() {
         }
 
+        @Override
         public void close() {
         }
 
+        @Override
         public void rewind() {
             cur = low;
         }
 
+        @Override
         public TupleDesc getTupleDesc() {
             return Utility.getTupleDesc(width);
         }
@@ -283,11 +310,13 @@ public class TestUtil {
             return tup;
         }
 
+        @Override
 		public boolean hasNext() throws DbException, TransactionAbortedException {
 			if (cur >= high) return false;
 			return true;
 		}
 
+		@Override
 		public Tuple next() throws DbException, TransactionAbortedException, NoSuchElementException {
 			if(cur >= high) throw new NoSuchElementException();
             Tuple tup = new Tuple(getTupleDesc());
@@ -344,7 +373,7 @@ public class TestUtil {
 
                 try {
                     Database.getBufferPool().transactionComplete(tid, false);
-                } catch (java.io.IOException e2) {
+                } catch (IOException e2) {
                     e2.printStackTrace();
                 }
             }
