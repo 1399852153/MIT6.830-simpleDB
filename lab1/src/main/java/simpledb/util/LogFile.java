@@ -104,7 +104,7 @@ public class LogFile {
 //    int pageSize;
     int totalRecords = 0; // for PatchTest //protected by this
 
-    HashMap<Long,Long> tidToFirstLogRecord = new HashMap<Long,Long>();
+    HashMap<Long,Long> tidToFirstLogRecord = new HashMap<>();
 
     /** Constructor.
         Initialize and back the log file with the specified file.
@@ -118,7 +118,7 @@ public class LogFile {
         @param f The log file's name
     */
     public LogFile(File f) throws IOException {
-	this.logFile = f;
+	    this.logFile = f;
         raf = new RandomAccessFile(f, "rw");
         recoveryUndecided = true;
 

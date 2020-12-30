@@ -67,8 +67,7 @@ public class StringField implements Field {
 		String s = value;
 		int overflow = maxSize - s.length();
 		if (overflow < 0) {
-			String news = s.substring(0, maxSize);
-			s = news;
+			s = s.substring(0, maxSize);
 		}
 		dos.writeInt(s.length());
 		dos.writeBytes(s);

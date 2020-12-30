@@ -59,7 +59,7 @@ public class TupleDesc implements Serializable {
     }
 
     private static final long serialVersionUID = 1L;
-    private ArrayList<TDItem> items;
+    private final ArrayList<TDItem> items;
     /**
      * Create a new TupleDesc with typeAr.length fields with fields of the
      * specified types, with associated named fields.
@@ -163,8 +163,8 @@ public class TupleDesc implements Serializable {
     public int getSize() {
         // some code goes here
         int size = 0;
-        for (int i = 0; i < items.size(); i++) {
-            size += items.get(i).fieldType.getLen();
+        for (TDItem item : items) {
+            size += item.fieldType.getLen();
         }
         return size;
     }

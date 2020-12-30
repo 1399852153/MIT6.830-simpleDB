@@ -58,31 +58,28 @@ public class IntField implements Field {
      */
     @Override
     public boolean compare(Predicate.Op op, Field val) {
-
         IntField iVal = (IntField) val;
 
         switch (op) {
-        case EQUALS:
-            return value == iVal.value;
-        case NOT_EQUALS:
-            return value != iVal.value;
+            case EQUALS:
+            case LIKE:
+                return value == iVal.value;
 
-        case GREATER_THAN:
-            return value > iVal.value;
+            case NOT_EQUALS:
+                return value != iVal.value;
 
-        case GREATER_THAN_OR_EQ:
-            return value >= iVal.value;
+            case GREATER_THAN:
+                return value > iVal.value;
 
-        case LESS_THAN:
-            return value < iVal.value;
+            case GREATER_THAN_OR_EQ:
+                return value >= iVal.value;
 
-        case LESS_THAN_OR_EQ:
-            return value <= iVal.value;
+            case LESS_THAN:
+                return value < iVal.value;
 
-    case LIKE:
-        return value == iVal.value;
+            case LESS_THAN_OR_EQ:
+                return value <= iVal.value;
         }
-
         return false;
     }
 
