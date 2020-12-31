@@ -193,9 +193,8 @@ public class TestUtil {
         byte[] buf = new byte[(int) f.length()];
 
         int offset = 0;
-        int count = 0;
-        while (offset < buf.length
-               && (count = is.read(buf, offset, buf.length - offset)) >= 0) {
+        int count;
+        while (offset < buf.length && (count = is.read(buf, offset, buf.length - offset)) >= 0) {
             offset += count;
         }
 

@@ -20,7 +20,7 @@ public class CatalogTest extends SimpleDbTestBase {
     private static String name = "test";
 	private String nameThisTestRun;
     
-    @Before public void addTables() throws Exception {
+    @Before public void addTables() {
         Database.getCatalog().clear();
 		nameThisTestRun = SystemTestUtil.getUUID();
         Database.getCatalog().addTable(new SkeletonFile(-1, Utility.getTupleDesc(2)), nameThisTestRun);
@@ -30,7 +30,7 @@ public class CatalogTest extends SimpleDbTestBase {
     /**
      * Unit test for Catalog.getTupleDesc()
      */
-    @Test public void getTupleDesc() throws Exception {
+    @Test public void getTupleDesc() {
         TupleDesc expected = Utility.getTupleDesc(2);
         TupleDesc actual = Database.getCatalog().getTupleDesc(-1);
 
@@ -62,7 +62,7 @@ public class CatalogTest extends SimpleDbTestBase {
     /**
      * Unit test for Catalog.getDatabaseFile()
      */
-    @Test public void getDatabaseFile() throws Exception {
+    @Test public void getDatabaseFile() {
         DbFile f = Database.getCatalog().getDatabaseFile(-1);
 
         // NOTE(ghuo): we try not to dig too deeply into the DbFile API here; we

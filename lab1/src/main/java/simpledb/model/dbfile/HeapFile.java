@@ -7,6 +7,7 @@ import simpledb.model.page.HeapPage;
 import simpledb.model.page.Page;
 import simpledb.model.pageid.HeapPageId;
 import simpledb.model.pageid.PageId;
+import simpledb.util.BufferPool;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -86,17 +87,16 @@ public class HeapFile implements DbFile {
         // some code goes here
         int tableid = pid.getTableId();
         int pgNo = pid.pageNumber();
-        final int pageSize = Database.getBufferPool().getPageSize();
+        Database.getBufferPool();
+        final int pageSize = BufferPool.getPageSize();
         byte[] rawPgData = HeapPage.createEmptyPageData();
 
         // random access read from disk
         try {
             FileInputStream in = new FileInputStream(dbFile);
-            in.skip(pgNo * pageSize);
+            in.skip((long) pgNo * pageSize);
             in.read(rawPgData);
             return new HeapPage(new HeapPageId(tableid, pgNo), rawPgData);
-        } catch (FileNotFoundException e) {
-            throw new IllegalArgumentException("HeapFile: readPage: file not found");
         } catch (IOException e) {
             throw new IllegalArgumentException("HeapFile: readPage: file not found");
         }

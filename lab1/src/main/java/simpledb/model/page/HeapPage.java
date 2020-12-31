@@ -55,9 +55,9 @@ public class HeapPage implements Page {
 
         // allocate and read the header slots of this page
         header = new byte[getHeaderSize()];
-        for (int i=0; i<header.length; i++)
+        for (int i=0; i<header.length; i++) {
             header[i] = dis.readByte();
-        
+        }
         tuples = new Tuple[numSlots];
         try{
             // allocate and read the actual records of this page
@@ -72,11 +72,14 @@ public class HeapPage implements Page {
         setBeforeImage();
     }
 
-    /** Retrieve the number of tuples on this page.
-        @return the number of tuples on this page
-    */
+    /**
+     * Retrieve the number of tuples on this page.
+     * @return the number of tuples on this page
+     */
     private int getNumTuples() {        
-        // some code goes here
+        // BufferPool.getPageSize() * 8 => 每个HeapPage的字节数 * 8 => 每个HeapPage的字节数bit数（1Byte字节=8bit）
+        // td.getSize() * 8 + 1 => 每一个tuple的字节数 * 8 + 1(每个tuple占HeapPage header位图的1bit位)
+        // return返回值：HeapPage一页能容纳的tuple最大数量（slot插槽数）
         return (BufferPool.getPageSize() * 8) / (td.getSize() * 8 + 1);
     }
 
@@ -84,19 +87,21 @@ public class HeapPage implements Page {
      * Computes the number of bytes in the header of a page in a HeapFile with each tuple occupying tupleSize bytes
      * @return the number of bytes in the header of a page in a HeapFile with each tuple occupying tupleSize bytes
      */
-    private int getHeaderSize() {        
-        
-        // some code goes here
-        return (getNumTuples() + 7) / 8;
-                 
+    private int getHeaderSize() {
+        // page对应的slot插槽数决定了需要为header位图分配的内存大小
+        // header位图是以Byte为单位分配的，因此需要分配的Byte数为插槽数/8，向上取整
+        // 例如插槽数是9，那么必须要9/8=1.xxxx(向上取整)=2Byte共16bit的空间（1*8 < 9 < 2*8）来对应这9个插槽
+        return (int)Math.ceil(getNumTuples()*1.0/8);
     }
     
-    /** Return a view of this page before it was modified
-        -- used by recovery */
+    /**
+     * Return a view of this page before it was modified
+     * -- used by recovery
+     */
     @Override
     public HeapPage getBeforeImage(){
         try {
-            byte[] oldDataRef = null;
+            byte[] oldDataRef;
             synchronized(oldDataLock)
             {
                 oldDataRef = oldData;
@@ -112,9 +117,8 @@ public class HeapPage implements Page {
 
     @Override
     public void setBeforeImage() {
-        synchronized(oldDataLock)
-        {
-        oldData = getPageData().clone();
+        synchronized(oldDataLock) {
+            oldData = getPageData().clone();
         }
     }
 
@@ -123,7 +127,6 @@ public class HeapPage implements Page {
      */
     @Override
     public HeapPageId getId() {
-    // some code goes here
         return this.pid;
     }
 
@@ -313,9 +316,16 @@ public class HeapPage implements Page {
         // some code goes here
         // big endian most significant in lower address
         if (i < numSlots) {
+            // 除8，计算出当前tuple下表在header字节数组对应的下标
             int hdNo = (i / 8);
+            // 对8取模，计算出在对应字节中的偏移量
             int offset = i % 8;
-            return (header[hdNo] & (0x1 << offset)) != 0;
+            // 获得在header位图中的对应字节
+            byte bitMapByte = header[hdNo];
+            // jvm中使用大端BigEndian法在内存中存储数据，因此inByteIndex在byte中的下标以左移的方式计算（Byte类型十进制15，大端法存储位0b 00001111）
+            int inByteIndex = 0x1 << offset;
+
+            return (bitMapByte & inByteIndex) != 0;
         }
         return false;
     }
@@ -328,7 +338,7 @@ public class HeapPage implements Page {
         // not necessary for lab1
     }
 
-    protected class HeapPageTupleIterator implements Iterator {
+    protected class HeapPageTupleIterator implements Iterator<Tuple> {
         private final Iterator<Tuple> iter;
         public HeapPageTupleIterator() {
             ArrayList<Tuple> tupleArrayList = new ArrayList<Tuple>(tuples.length);
@@ -351,7 +361,7 @@ public class HeapPage implements Page {
         }
 
         @Override
-        public Object next() {
+        public Tuple next() {
             return iter.next();
         }
     }

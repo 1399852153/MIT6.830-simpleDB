@@ -122,7 +122,7 @@ public class SeqScan implements DbIterator {
                 field = "null";
             }
             field = prefix + "." + field;
-
+            fieldAr[i] = field;
         }
 
         return new TupleDesc(typeAr, fieldAr);
@@ -135,8 +135,7 @@ public class SeqScan implements DbIterator {
     }
 
     @Override
-    public Tuple next() throws NoSuchElementException,
-            TransactionAbortedException, DbException {
+    public Tuple next() throws NoSuchElementException, TransactionAbortedException, DbException {
         // some code goes here
         return dbfileIterator.next();
     }
@@ -148,8 +147,7 @@ public class SeqScan implements DbIterator {
     }
 
     @Override
-    public void rewind() throws DbException, NoSuchElementException,
-            TransactionAbortedException {
+    public void rewind() throws DbException, NoSuchElementException, TransactionAbortedException {
         // some code goes here
         dbfileIterator.rewind();
     }
