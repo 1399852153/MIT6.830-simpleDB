@@ -1,4 +1,7 @@
-package simpledb.model;
+package simpledb.model.iterator.db;
+
+import simpledb.model.Tuple;
+import simpledb.model.TupleDesc;
 
 import java.util.*;
 

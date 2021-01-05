@@ -1,6 +1,7 @@
-package simpledb.model;
+package simpledb.model.iterator.dbfile;
 import simpledb.exception.DbException;
 import simpledb.exception.TransactionAbortedException;
+import simpledb.model.Tuple;
 
 import java.util.*;
 

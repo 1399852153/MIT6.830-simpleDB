@@ -4,6 +4,8 @@ import simpledb.enums.Type;
 import simpledb.exception.DbException;
 import simpledb.exception.TransactionAbortedException;
 import simpledb.model.dbfile.DbFile;
+import simpledb.model.iterator.db.DbIterator;
+import simpledb.model.iterator.dbfile.DbFileIterator;
 
 import java.util.*;
 
@@ -25,7 +27,7 @@ public class SeqScan implements DbIterator {
     /**
      * Creates a sequential scan over the specified table as a part of the
      * specified transaction.
-     * 
+     *
      * @param tid
      *            The transaction this scan is running as a part of.
      * @param tableid
@@ -55,9 +57,9 @@ public class SeqScan implements DbIterator {
     public String getTableName() {
         return Database.getCatalog().getTableName(tableId);
     }
-    
+
     /**
-     * @return Return the alias of the table this operator scans. 
+     * @return Return the alias of the table this operator scans.
      * */
     public String getAlias()
     {
@@ -98,7 +100,7 @@ public class SeqScan implements DbIterator {
      * prefixed with the tableAlias string from the constructor. This prefix
      * becomes useful when joining tables containing a field(s) with the same
      * name.
-     * 
+     *
      * @return the TupleDesc with field names from the underlying HeapFile,
      *         prefixed with the tableAlias string from the constructor.
      */

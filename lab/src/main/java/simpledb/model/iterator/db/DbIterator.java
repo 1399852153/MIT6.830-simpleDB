@@ -1,7 +1,9 @@
-package simpledb.model;
+package simpledb.model.iterator.db;
 
 import simpledb.exception.DbException;
 import simpledb.exception.TransactionAbortedException;
+import simpledb.model.Tuple;
+import simpledb.model.TupleDesc;
 
 import java.io.Serializable;
 import java.util.NoSuchElementException;

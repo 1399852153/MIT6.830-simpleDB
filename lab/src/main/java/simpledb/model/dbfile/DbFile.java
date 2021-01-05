@@ -2,6 +2,7 @@
 package simpledb.model.dbfile;
 
 import simpledb.model.*;
+import simpledb.model.iterator.dbfile.DbFileIterator;
 import simpledb.model.page.Page;
 import simpledb.model.pageid.PageId;
 import simpledb.util.BufferPool;

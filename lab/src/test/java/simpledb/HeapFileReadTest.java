@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import simpledb.model.*;
 import simpledb.model.dbfile.HeapFile;
+import simpledb.model.iterator.dbfile.DbFileIterator;
 import simpledb.model.page.HeapPage;
 import simpledb.model.pageid.HeapPageId;
 import simpledb.systemtest.SimpleDbTestBase;

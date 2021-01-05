@@ -3,6 +3,7 @@ package simpledb.systemtest;
 import org.junit.Assert;
 import simpledb.model.*;
 import simpledb.model.field.IntField;
+import simpledb.model.iterator.db.DbIterator;
 import simpledb.util.BufferPool;
 import simpledb.enums.Type;
 import simpledb.exception.DbException;

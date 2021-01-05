@@ -2,11 +2,11 @@ package simpledb;
 import simpledb.enums.Type;
 import simpledb.exception.DbException;
 import simpledb.exception.TransactionAbortedException;
-import simpledb.model.DbFileIterator;
 import simpledb.model.TransactionId;
 import simpledb.model.Tuple;
 import simpledb.model.dbfile.DbFile;
 import simpledb.model.dbfile.HeapFileEncoder;
+import simpledb.model.iterator.dbfile.DbFileIterator;
 import simpledb.util.BufferPool;
 import simpledb.util.Utility;
 
