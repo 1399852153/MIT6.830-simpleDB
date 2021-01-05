@@ -21,26 +21,26 @@ public class JoinTest extends SimpleDbTestBase {
             int table2Rows)
             throws IOException, DbException, TransactionAbortedException {
         // Create the two tables
-        HashMap<Integer, Integer> columnSpecification = new HashMap<Integer, Integer>();
+        HashMap<Integer, Integer> columnSpecification = new HashMap<>();
         columnSpecification.put(0, table1ColumnValue);
-        ArrayList<ArrayList<Integer>> t1Tuples = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> t1Tuples = new ArrayList<>();
         HeapFile table1 = SystemTestUtil.createRandomHeapFile(
                 COLUMNS, table1Rows, columnSpecification, t1Tuples);
         assert t1Tuples.size() == table1Rows;
 
         columnSpecification.put(0, table2ColumnValue);
-        ArrayList<ArrayList<Integer>> t2Tuples = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> t2Tuples = new ArrayList<>();
         HeapFile table2 = SystemTestUtil.createRandomHeapFile(
                 COLUMNS, table2Rows, columnSpecification, t2Tuples);
         assert t2Tuples.size() == table2Rows;
 
         // Generate the expected results
-        ArrayList<ArrayList<Integer>> expectedResults = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> expectedResults = new ArrayList<>();
         for (ArrayList<Integer> t1 : t1Tuples) {
             for (ArrayList<Integer> t2 : t2Tuples) {
                 // If the columns match, join the tuples
                 if (t1.get(0).equals(t2.get(0))) {
-                    ArrayList<Integer> out = new ArrayList<Integer>(t1);
+                    ArrayList<Integer> out = new ArrayList<>(t1);
                     out.addAll(t2);
                     expectedResults.add(out);
                 }

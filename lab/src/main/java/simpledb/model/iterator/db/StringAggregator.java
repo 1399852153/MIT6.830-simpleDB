@@ -44,14 +44,14 @@ public class StringAggregator implements Aggregator {
         this.afrield = afield;
 
         if (this.gbfield == Aggregator.NO_GROUPING) {
-            aggr = (Object) new Integer(0);
+            aggr = 0;
         } else {
             // grouping
             assert gbfieldtype != null;
             if (gbfieldtype == Type.INT_TYPE) {
-                aggr = (Object) new TreeMap<Integer, ArrayList<Integer>>();
+                aggr = new TreeMap<Integer, ArrayList<Integer>>();
             } else {
-                aggr = (Object) new TreeMap<String, ArrayList<Integer>>();
+                aggr = new TreeMap<String, ArrayList<Integer>>();
             }
         }
 
@@ -109,7 +109,7 @@ public class StringAggregator implements Aggregator {
             assert what == Op.COUNT;
 
             this.it = null;
-            res = new ArrayList<Tuple>();
+            res = new ArrayList<>();
             if (gbfield == Aggregator.NO_GROUPING) {
                 Tuple t = new Tuple(getTupleDesc());
                 Field aggregateVal = new IntField((Integer) aggr);
@@ -118,7 +118,7 @@ public class StringAggregator implements Aggregator {
             } else {
                 for (Map.Entry e : ((TreeMap<Integer, ArrayList<Integer>>) aggr).entrySet()) {
                     Tuple t = new Tuple(getTupleDesc());
-                    Field groupVal = null;
+                    Field groupVal;
                     if (gbfieldtype == Type.INT_TYPE) {
                         groupVal = new IntField((int) e.getKey());
                     } else {

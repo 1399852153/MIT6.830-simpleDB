@@ -46,7 +46,7 @@ public class TestUtil {
      */
     public static TupleIterator createTupleList(int width, int[] tupdata) {
         int i = 0;
-        ArrayList<Tuple> tuplist = new ArrayList<Tuple>();
+        ArrayList<Tuple> tuplist = new ArrayList<>();
         while (i < tupdata.length) {
             Tuple tup = new Tuple(Utility.getTupleDesc(width));
             for (int j = 0; j < width; ++j)
@@ -70,7 +70,7 @@ public class TestUtil {
      *   TupleIterator
      */
     public static TupleIterator createTupleList(int width, Object[] tupdata) {
-        ArrayList<Tuple> tuplist = new ArrayList<Tuple>();
+        ArrayList<Tuple> tuplist = new ArrayList<>();
         TupleDesc td;
         Type[] types = new Type[width];
         int i= 0;

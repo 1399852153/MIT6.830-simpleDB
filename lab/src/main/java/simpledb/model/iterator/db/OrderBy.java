@@ -17,7 +17,7 @@ public class OrderBy extends Operator {
     private static final long serialVersionUID = 1L;
     private DbIterator child;
     private TupleDesc td;
-    private ArrayList<Tuple> childTups = new ArrayList<Tuple>();
+    private ArrayList<Tuple> childTups = new ArrayList<>();
     private int orderByField;
     private String orderByFieldName;
     private Iterator<Tuple> it;
@@ -65,8 +65,8 @@ public class OrderBy extends Operator {
         child.open();
         // load all the tuples in a collection, and sort it
         while (child.hasNext())
-            childTups.add((Tuple) child.next());
-        Collections.sort(childTups, new TupleComparator(orderByField, asc));
+            childTups.add(child.next());
+        childTups.sort(new TupleComparator(orderByField, asc));
         it = childTups.iterator();
         super.open();
     }

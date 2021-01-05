@@ -48,15 +48,15 @@ public class IntegerAggregator implements Aggregator {
         this.what = what;
         // this.aggregates = new TreeMap<>();
         if (this.gbfield == Aggregator.NO_GROUPING) {
-            aggr = (Object) new ArrayList<Integer>();
+            aggr = new ArrayList<Integer>();
         } else {
             // grouping
             assert gbfieldtype != null;
             if (gbfieldtype == Type.INT_TYPE) {
-                aggr = (Object) new TreeMap<Integer, ArrayList<Integer>>();
+                aggr = new TreeMap<Integer, ArrayList<Integer>>();
             } else {
                 // must be STRING_TYPE
-                aggr = (Object) new TreeMap<String, ArrayList<Integer>>();
+                aggr = new TreeMap<String, ArrayList<Integer>>();
             }
         }
     }
@@ -158,7 +158,7 @@ public class IntegerAggregator implements Aggregator {
         }
 
         public AggrDbIterator() {
-            res = new ArrayList<Tuple>();
+            res = new ArrayList<>();
             if (gbfield == Aggregator.NO_GROUPING) {
                 Tuple t = new Tuple(getTupleDesc());
                 Field aggregateVal = new IntField(this.calcAggrRes((ArrayList<Integer>) aggr));

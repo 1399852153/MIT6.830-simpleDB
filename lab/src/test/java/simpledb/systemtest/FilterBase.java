@@ -58,9 +58,9 @@ public abstract class FilterBase extends SimpleDbTestBase {
 
     private HeapFile createTable(int column, int columnValue)
             throws IOException, DbException, TransactionAbortedException {
-        Map<Integer, Integer> columnSpecification = new HashMap<Integer, Integer>();
+        Map<Integer, Integer> columnSpecification = new HashMap<>();
         columnSpecification.put(column, columnValue);
-        createdTuples = new ArrayList<ArrayList<Integer>>();
+        createdTuples = new ArrayList<>();
         return SystemTestUtil.createRandomHeapFile(
                 COLUMNS, ROWS, columnSpecification, createdTuples);
     }

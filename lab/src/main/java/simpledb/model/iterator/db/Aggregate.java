@@ -41,7 +41,7 @@ public class Aggregate extends Operator {
      *            The aggregation operator to use
      */
     public Aggregate(DbIterator child, int afield, int gfield, Aggregator.Op aop) {
-	// some code goes here
+	    // some code goes here
         this.afield = afield;
         this.gfield = gfield;
         this.aop = aop;
@@ -55,7 +55,7 @@ public class Aggregate extends Operator {
      *         {@link Aggregator#NO_GROUPING}
      * */
     public int groupField() {
-	// some code goes here
+	    // some code goes here
 	    return gfield;
     }
 
@@ -65,7 +65,7 @@ public class Aggregate extends Operator {
      *         null;
      * */
     public String groupFieldName() {
-	// some code goes here
+	    // some code goes here
         return child.getTupleDesc().getFieldName(gfield);
     }
 
@@ -73,7 +73,7 @@ public class Aggregate extends Operator {
      * @return the aggregate field
      * */
     public int aggregateField() {
-	// some code goes here
+	    // some code goes here
 	    return afield;
     }
 
@@ -90,7 +90,7 @@ public class Aggregate extends Operator {
      * @return return the aggregate operator
      * */
     public Aggregator.Op aggregateOp() {
-	// some code goes here
+	    // some code goes here
 	    return aop;
     }
 
@@ -100,7 +100,7 @@ public class Aggregate extends Operator {
 
     public void open() throws NoSuchElementException, DbException,
             TransactionAbortedException {
-	// some code goes here
+	    // some code goes here
 
         child.open();
         Type gbt = null;
@@ -133,7 +133,7 @@ public class Aggregate extends Operator {
      * aggregate. Should return null if there are no more tuples.
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
-	// some code goes here
+	    // some code goes here
         if (it.hasNext()) {
             return it.next();
         } else {
@@ -178,13 +178,13 @@ public class Aggregate extends Operator {
 
     @Override
     public DbIterator[] getChildren() {
-	// some code goes here
+	    // some code goes here
 	    return new DbIterator[]{child};
     }
 
     @Override
     public void setChildren(DbIterator[] children) {
-	// some code goes here
+	    // some code goes here
         this.child = children[0];
     }
     

@@ -15,7 +15,8 @@ public class JoinPredicateTest extends SimpleDbTestBase {
   /**
    * Unit test for JoinPredicate.filter()
    */
-  @Test public void filterVaryingVals() {
+  @Test
+  public void filterVaryingVals() {
     int[] vals = new int[] { -1, 0, 1 };
 
     for (int i : vals) {
