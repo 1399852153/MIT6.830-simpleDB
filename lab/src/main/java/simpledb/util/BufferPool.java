@@ -95,6 +95,7 @@ public class BufferPool {
             // LRU policy
             int bufferSize = pageBuffer.size();
             if (bufferSize > 0 && bufferSize == capacity) {
+                // 先进先出淘汰算法 FIFO
                 Page pg = pageBuffer.get(0);
                 // pageIdxMap.remove(pg.getId());
                 return pg;
@@ -311,14 +312,11 @@ public class BufferPool {
      */
     private synchronized  void evictPage() throws DbException {
         // some code goes here
-        // not necessary for lab1
         Page pg = bufferPool.evictPage();
         PageId pid = pg.getId();
         try {
-            if (pg != null) {
-                flushPage(pid);
-                discardPage(pid);
-            }
+            flushPage(pid);
+            discardPage(pid);
         } catch (IOException e) {
             throw new DbException("evictPage: unable to error when flush a page");
         }

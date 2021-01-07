@@ -108,9 +108,10 @@ public class HeapPageWriteTest extends SimpleDbTestBase {
 
         // first, build a list of the tuples on the page.
         Iterator<Tuple> it = page.iterator();
-        LinkedList<Tuple> tuples = new LinkedList<Tuple>();
-        while (it.hasNext())
+        LinkedList<Tuple> tuples = new LinkedList<>();
+        while (it.hasNext()) {
             tuples.add(it.next());
+        }
         Tuple first = tuples.getFirst();
 
         // now, delete them one-by-one from both the front and the end.

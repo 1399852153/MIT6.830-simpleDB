@@ -20,11 +20,11 @@ public class InsertTest extends SimpleDbTestBase {
     private void validateInsert(int columns, int sourceRows, int destinationRows)
                 throws DbException, IOException, TransactionAbortedException {
         // Create the two tables
-        ArrayList<ArrayList<Integer>> sourceTuples = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> sourceTuples = new ArrayList<>();
         HeapFile source = SystemTestUtil.createRandomHeapFile(
                 columns, sourceRows, null, sourceTuples);
         assert sourceTuples.size() == sourceRows;
-        ArrayList<ArrayList<Integer>> destinationTuples = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> destinationTuples = new ArrayList<>();
         HeapFile destination = SystemTestUtil.createRandomHeapFile(
                 columns, destinationRows, null, destinationTuples);
         assert destinationTuples.size() == destinationRows;

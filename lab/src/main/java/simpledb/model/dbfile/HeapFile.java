@@ -144,25 +144,31 @@ public class HeapFile implements DbFile {
             HeapPageId pid = new HeapPageId(getId(), pgNo);
             HeapPage pg;
             if (pgNo < numPages) {
+                // 从已存在的页中尝试着找到一个空闲插槽
                 pg = (HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
             } else {
                 // pgNo = numpages -> we need add new page
+
+                // 已经遍历了所有已存在的页，没有找到空闲的插槽可用，必须创建一个新的页来承载新插入的Tuple
                 pg = new HeapPage(pid, HeapPage.createEmptyPageData());
             }
 
+            // 依然存在空插槽
             if (pg.getNumEmptySlots() > 0) {
-                // insert will update tuple when inserted
                 pg.insertTuple(t);
-                // writePage(pg);
+
                 if (pgNo < numPages) {
+                    // 被影响的页
                     affected.add(pg);
                 } else {
                     // should append the dbfile
+                    // 当前HeapFile写入一个新的页
                     writePage(pg);
                 }
                 return affected;
             }
 
+            // 换下一页继续查询空插槽
         }
         // otherwise create new page and insert
         throw new DbException("HeapFile: InsertTuple: Tuple can not be added");

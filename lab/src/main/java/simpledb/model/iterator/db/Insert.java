@@ -64,7 +64,7 @@ public class Insert extends Operator {
 
     public void rewind() throws DbException, TransactionAbortedException {
         // some code goes here
-        // child.rewind();
+        child.rewind();
     }
 
     /**
@@ -87,7 +87,8 @@ public class Insert extends Operator {
             DbFile dbFile = Database.getCatalog().getDatabaseFile(tableId);
             while (child.hasNext()) {
                 try {
-                    dbFile.insertTuple(tid, child.next());
+                    Tuple next = child.next();
+                    dbFile.insertTuple(tid, next);
                     count += 1;
                 } catch (IOException e) {
                     throw new DbException("Insert: Error: IOException when Inserting");

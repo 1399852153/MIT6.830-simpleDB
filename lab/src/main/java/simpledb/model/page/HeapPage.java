@@ -29,7 +29,7 @@ public class HeapPage implements Page {
     final int numSlots;
 
     byte[] oldData;
-    private final Byte oldDataLock=new Byte((byte)0);
+    private final Byte oldDataLock= (byte) 0;
 
     /**
      * Create a HeapPage from a set of bytes of data read from disk.
@@ -265,9 +265,14 @@ public class HeapPage implements Page {
         RecordId recToDelete = t.getRecordId();
         if (recToDelete != null && pid.equals(recToDelete.pageId)) {
             for (int i = 0; i < numSlots; i++) {
+                // 顺序扫描当前页的每一个插槽，进行recordId的匹配
                 if (isSlotUsed(i) && t.getRecordId().equals(tuples[i].getRecordId())) {
+                    // 匹配到了，将插槽标记为未使用
                     markSlotUsed(i, false);
+
                     // t.setRecordId(null);
+
+                    // 对应的tuple设置为null
                     tuples[i] = null;
                     return;
                 }
@@ -290,9 +295,12 @@ public class HeapPage implements Page {
         assert t != null;
         if (td.equals(t.getTupleDesc())) {
             for (int i = 0; i < numSlots; i++) {
+                // 遍历当前HeapPage的每一个插槽
                 if (!isSlotUsed(i)) {
-                    // insert and update header
+                    // 发现一个未使用的空插槽
+                    // 对应插槽标记为已使用
                     markSlotUsed(i, true);
+                    // 设置唯一的recordID （RecordID由pageID + page内插槽号组成）
                     t.setRecordId(new RecordId(pid, i));
                     tuples[i] = t;
                     return;
@@ -311,12 +319,12 @@ public class HeapPage implements Page {
      */
     @Override
     public void markDirty(boolean dirty, TransactionId tid) {
-        // some code goes here
-	// not necessary for lab1
         if (dirty) {
+            // 标记为脏页
             this.dirty = dirty;
             this.dirtyby = tid;
         } else {
+            // 标记为非脏页
             this.dirty = false;
             this.dirtyby = null;
         }
@@ -365,15 +373,18 @@ public class HeapPage implements Page {
      */
     private void markSlotUsed(int i, boolean value) {
         // some code goes here
-        // not necessary for lab1
         if (i < numSlots) {
+            // 计算字节数组下标
             int hdNo = i / 8;
+            // 计算对应字节中的bit位偏移
             int offset = i % 8;
 
             byte mask = (byte) (0x1 << offset);
             if (value) {
+                // 标记为已使用
                 header[hdNo] |= mask;
             } else {
+                // 标记为未使用
                 header[hdNo] &= ~mask;
             }
         }
@@ -382,7 +393,7 @@ public class HeapPage implements Page {
     protected class HeapPageTupleIterator implements Iterator {
         private final Iterator<Tuple> iter;
         public HeapPageTupleIterator() {
-            ArrayList<Tuple> tupleArrayList = new ArrayList<Tuple>(numSlots);
+            ArrayList<Tuple> tupleArrayList = new ArrayList<>(numSlots);
             for (int i = 0; i < numSlots; i++) {
                 if (isSlotUsed(i)) {
                     tupleArrayList.add(i, tuples[i]);

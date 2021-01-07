@@ -33,7 +33,7 @@ public class InsertTest extends TestUtil.CreateHeapFile {
                     3, 2,
                     3, 4,
                     3, 6,
-                    5, 7 });
+                    6, 8 });
     tid = new TransactionId();
   }
 
