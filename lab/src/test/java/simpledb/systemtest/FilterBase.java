@@ -58,34 +58,39 @@ public abstract class FilterBase extends SimpleDbTestBase {
 
     private HeapFile createTable(int column, int columnValue)
             throws IOException, DbException, TransactionAbortedException {
-        Map<Integer, Integer> columnSpecification = new HashMap<>();
+        Map<Integer, Integer> columnSpecification = new HashMap<Integer, Integer>();
         columnSpecification.put(column, columnValue);
-        createdTuples = new ArrayList<>();
+        createdTuples = new ArrayList<ArrayList<Integer>>();
         return SystemTestUtil.createRandomHeapFile(
                 COLUMNS, ROWS, columnSpecification, createdTuples);
     }
 
-    @Test public void testEquals() throws
+    @Test
+    public void testEquals() throws
             DbException, TransactionAbortedException, IOException {
         validatePredicate(0, 1, 1, 2, Predicate.Op.EQUALS);
     }
 
-    @Test public void testLessThan() throws
+    @Test
+    public void testLessThan() throws
             DbException, TransactionAbortedException, IOException {
         validatePredicate(1, 1, 2, 1, Predicate.Op.LESS_THAN);
     }
 
-    @Test public void testLessThanOrEq() throws
+    @Test
+    public void testLessThanOrEq() throws
             DbException, TransactionAbortedException, IOException {
         validatePredicate(2, 42, 42, 41, Predicate.Op.LESS_THAN_OR_EQ);
     }
 
-    @Test public void testGreaterThan() throws
+    @Test
+    public void testGreaterThan() throws
             DbException, TransactionAbortedException, IOException {
         validatePredicate(2, 42, 41, 42, Predicate.Op.GREATER_THAN);
     }
 
-    @Test public void testGreaterThanOrEq() throws
+    @Test
+    public void testGreaterThanOrEq() throws
             DbException, TransactionAbortedException, IOException {
         validatePredicate(2, 42, 42, 43, Predicate.Op.GREATER_THAN_OR_EQ);
     }

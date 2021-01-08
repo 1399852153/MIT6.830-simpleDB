@@ -8,6 +8,7 @@ import simpledb.model.*;
 import simpledb.model.dbfile.HeapFile;
 import simpledb.model.field.IntField;
 import simpledb.model.iterator.db.Insert;
+import simpledb.model.iterator.db.SeqScan;
 import simpledb.model.iterator.db.TupleIterator;
 import simpledb.util.Utility;
 

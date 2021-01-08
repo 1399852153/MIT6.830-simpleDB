@@ -1,17 +1,21 @@
 package simpledb.systemtest;
 
 import org.junit.Assert;
-import simpledb.model.*;
-import simpledb.model.field.IntField;
-import simpledb.model.iterator.db.DbIterator;
-import simpledb.util.BufferPool;
 import simpledb.enums.Type;
 import simpledb.exception.DbException;
 import simpledb.exception.TransactionAbortedException;
 import simpledb.log.Debug;
+import simpledb.model.Database;
+import simpledb.model.TransactionId;
+import simpledb.model.Tuple;
+import simpledb.model.TupleDesc;
 import simpledb.model.dbfile.DbFile;
 import simpledb.model.dbfile.HeapFile;
 import simpledb.model.dbfile.HeapFileEncoder;
+import simpledb.model.field.IntField;
+import simpledb.model.iterator.db.DbIterator;
+import simpledb.model.iterator.db.SeqScan;
+import simpledb.util.BufferPool;
 import simpledb.util.Utility;
 
 import java.io.File;
@@ -115,7 +119,7 @@ public class SystemTestUtil {
 
     public static void matchTuples(DbIterator iterator, List<ArrayList<Integer>> tuples)
             throws DbException, TransactionAbortedException, IOException {
-        ArrayList<ArrayList<Integer>> copy = new ArrayList<>(tuples);
+        ArrayList<ArrayList<Integer>> copy = new ArrayList<ArrayList<Integer>>(tuples);
 
         if (Debug.isEnabled()) {
             Debug.log("Expected tuples:");

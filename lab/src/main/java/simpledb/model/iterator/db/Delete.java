@@ -10,6 +10,8 @@ import simpledb.model.dbfile.DbFile;
 import simpledb.util.BufferPool;
 import simpledb.util.Utility;
 
+import java.io.IOException;
+
 /**
  * The delete operator. Delete reads tuples from its child operator and removes
  * them from the table they belong to.

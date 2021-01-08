@@ -6,10 +6,10 @@ import simpledb.exception.DbException;
 import simpledb.exception.TransactionAbortedException;
 import simpledb.model.Database;
 import simpledb.model.JoinPredicate;
-import simpledb.model.SeqScan;
 import simpledb.model.TransactionId;
 import simpledb.model.dbfile.HeapFile;
 import simpledb.model.iterator.db.Join;
+import simpledb.model.iterator.db.SeqScan;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,26 +21,26 @@ public class JoinTest extends SimpleDbTestBase {
             int table2Rows)
             throws IOException, DbException, TransactionAbortedException {
         // Create the two tables
-        HashMap<Integer, Integer> columnSpecification = new HashMap<>();
+        HashMap<Integer, Integer> columnSpecification = new HashMap<Integer, Integer>();
         columnSpecification.put(0, table1ColumnValue);
-        ArrayList<ArrayList<Integer>> t1Tuples = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> t1Tuples = new ArrayList<ArrayList<Integer>>();
         HeapFile table1 = SystemTestUtil.createRandomHeapFile(
                 COLUMNS, table1Rows, columnSpecification, t1Tuples);
         assert t1Tuples.size() == table1Rows;
 
         columnSpecification.put(0, table2ColumnValue);
-        ArrayList<ArrayList<Integer>> t2Tuples = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> t2Tuples = new ArrayList<ArrayList<Integer>>();
         HeapFile table2 = SystemTestUtil.createRandomHeapFile(
                 COLUMNS, table2Rows, columnSpecification, t2Tuples);
         assert t2Tuples.size() == table2Rows;
 
         // Generate the expected results
-        ArrayList<ArrayList<Integer>> expectedResults = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> expectedResults = new ArrayList<ArrayList<Integer>>();
         for (ArrayList<Integer> t1 : t1Tuples) {
             for (ArrayList<Integer> t2 : t2Tuples) {
                 // If the columns match, join the tuples
                 if (t1.get(0).equals(t2.get(0))) {
-                    ArrayList<Integer> out = new ArrayList<>(t1);
+                    ArrayList<Integer> out = new ArrayList<Integer>(t1);
                     out.addAll(t2);
                     expectedResults.add(out);
                 }
@@ -61,17 +61,20 @@ public class JoinTest extends SimpleDbTestBase {
         Database.getBufferPool().transactionComplete(tid);
     }
 
-    @Test public void testSingleMatch()
+    @Test
+    public void testSingleMatch()
             throws IOException, DbException, TransactionAbortedException {
         validateJoin(1, 1, 1, 1);
     }
 
-    @Test public void testNoMatch()
+    @Test
+    public void testNoMatch()
             throws IOException, DbException, TransactionAbortedException {
         validateJoin(1, 2, 2, 10);
     }
 
-    @Test public void testMultipleMatch()
+    @Test
+    public void testMultipleMatch()
             throws IOException, DbException, TransactionAbortedException {
         validateJoin(1, 3, 1, 3);
     }

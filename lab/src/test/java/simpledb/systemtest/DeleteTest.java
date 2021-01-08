@@ -3,13 +3,13 @@ package simpledb.systemtest;
 import simpledb.enums.Predicate;
 import simpledb.exception.DbException;
 import simpledb.exception.TransactionAbortedException;
-import simpledb.model.SeqScan;
 import simpledb.model.TransactionId;
 import simpledb.model.Tuple;
 import simpledb.model.dbfile.HeapFile;
 import simpledb.model.field.IntField;
 import simpledb.model.iterator.db.Delete;
 import simpledb.model.iterator.db.Filter;
+import simpledb.model.iterator.db.SeqScan;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,6 +26,14 @@ public class DeleteTest extends FilterBase {
         Filter filter = new Filter(predicate, ss);
         Delete deleteOperator = new Delete(tid, filter);
 //        Query q = new Query(deleteOperator, tid);
+
+        filter.open();
+        int cnt = 0;
+        while (filter.hasNext()) {
+            filter.next();
+            cnt += 1;
+        }
+        filter.close();
 
 //        q.start();
         deleteOperator.open();

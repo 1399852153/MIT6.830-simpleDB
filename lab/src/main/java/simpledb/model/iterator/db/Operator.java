@@ -5,6 +5,7 @@ import simpledb.exception.TransactionAbortedException;
 import simpledb.model.Tuple;
 import simpledb.model.TupleDesc;
 
+import java.io.IOException;
 import java.util.NoSuchElementException;
 
 /**

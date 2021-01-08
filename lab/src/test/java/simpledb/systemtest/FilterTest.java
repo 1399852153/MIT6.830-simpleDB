@@ -3,10 +3,10 @@ package simpledb.systemtest;
 import simpledb.enums.Predicate;
 import simpledb.exception.DbException;
 import simpledb.exception.TransactionAbortedException;
-import simpledb.model.SeqScan;
 import simpledb.model.TransactionId;
 import simpledb.model.dbfile.HeapFile;
 import simpledb.model.iterator.db.Filter;
+import simpledb.model.iterator.db.SeqScan;
 
 import java.io.IOException;
 

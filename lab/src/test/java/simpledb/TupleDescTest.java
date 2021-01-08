@@ -1,6 +1,5 @@
 package simpledb;
 
-import junit.framework.Assert;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import simpledb.enums.Type;

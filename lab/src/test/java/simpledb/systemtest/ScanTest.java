@@ -3,8 +3,12 @@ package simpledb.systemtest;
 import org.junit.Test;
 import simpledb.exception.DbException;
 import simpledb.exception.TransactionAbortedException;
-import simpledb.model.*;
+import simpledb.model.Database;
+import simpledb.model.TransactionId;
+import simpledb.model.Tuple;
+import simpledb.model.TupleDesc;
 import simpledb.model.dbfile.HeapFile;
+import simpledb.model.iterator.db.SeqScan;
 import simpledb.model.page.Page;
 import simpledb.model.pageid.PageId;
 import simpledb.util.BufferPool;
@@ -32,7 +36,7 @@ public class ScanTest extends SimpleDbTestBase {
             throws IOException, DbException, TransactionAbortedException {
         for (int columns : columnSizes) {
             for (int rows : rowSizes) {
-                ArrayList<ArrayList<Integer>> tuples = new ArrayList<>();
+                ArrayList<ArrayList<Integer>> tuples = new ArrayList<ArrayList<Integer>>();
                 HeapFile f = SystemTestUtil.createRandomHeapFile(columns, rows, null, tuples);
                 SystemTestUtil.matchTuples(f, tuples);
                 Database.resetBufferPool(BufferPool.DEFAULT_PAGES);
@@ -43,16 +47,16 @@ public class ScanTest extends SimpleDbTestBase {
     /** Scan 1-4 columns. */
     @Test
     public void testSmall() throws IOException, DbException, TransactionAbortedException {
-        int[] columnSizes = new int[]{1, 2, 3, 4};
+        int[] columnSizes = new int[]{1, 2, 3, 4, 5};
         int[] rowSizes =
-                new int[]{0, 1, 2, 511, 512, 513, 1023, 1024, 1025, 4096 + r.nextInt(4096)};
-        validateScan(columnSizes, rowSizes);
+                new int[]{0, 1, 2, 511, 512, 513, 1023, 1024, 1025, 4096 + r.nextInt(4096)}; // 0, 1, 2, 511, 512, 513,
+                validateScan(columnSizes, rowSizes);
     }
 
     /** Test that rewinding a SeqScan iterator works. */
     @Test
     public void testRewind() throws IOException, DbException, TransactionAbortedException {
-        ArrayList<ArrayList<Integer>> tuples = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> tuples = new ArrayList<ArrayList<Integer>>();
         HeapFile f = SystemTestUtil.createRandomHeapFile(2, 1000, null, tuples);
 
         TransactionId tid = new TransactionId();
@@ -96,7 +100,7 @@ public class ScanTest extends SimpleDbTestBase {
 
         // Create the table
         final int PAGES = 30;
-        ArrayList<ArrayList<Integer>> tuples = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> tuples = new ArrayList<ArrayList<Integer>>();
         File f = SystemTestUtil.createRandomHeapFileUnopened(1, 992*PAGES, 1000, null, tuples);
         TupleDesc td = Utility.getTupleDesc(1);
         InstrumentedHeapFile table = new InstrumentedHeapFile(f, td);

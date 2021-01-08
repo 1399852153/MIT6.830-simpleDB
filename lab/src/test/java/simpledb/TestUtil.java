@@ -46,7 +46,7 @@ public class TestUtil {
      */
     public static TupleIterator createTupleList(int width, int[] tupdata) {
         int i = 0;
-        ArrayList<Tuple> tuplist = new ArrayList<>();
+        ArrayList<Tuple> tuplist = new ArrayList<Tuple>();
         while (i < tupdata.length) {
             Tuple tup = new Tuple(Utility.getTupleDesc(width));
             for (int j = 0; j < width; ++j)
@@ -70,7 +70,7 @@ public class TestUtil {
      *   TupleIterator
      */
     public static TupleIterator createTupleList(int width, Object[] tupdata) {
-        ArrayList<Tuple> tuplist = new ArrayList<>();
+        ArrayList<Tuple> tuplist = new ArrayList<Tuple>();
         TupleDesc td;
         Type[] types = new Type[width];
         int i= 0;
@@ -196,8 +196,9 @@ public class TestUtil {
         byte[] buf = new byte[(int) f.length()];
 
         int offset = 0;
-        int count;
-        while (offset < buf.length && (count = is.read(buf, offset, buf.length - offset)) >= 0) {
+        int count = 0;
+        while (offset < buf.length
+               && (count = is.read(buf, offset, buf.length - offset)) >= 0) {
             offset += count;
         }
 
@@ -222,7 +223,6 @@ public class TestUtil {
             this.td = td;
         }
 
-        @Override
         public Page readPage(PageId id) throws NoSuchElementException {
             throw new RuntimeException("not implemented");
         }
@@ -242,7 +242,7 @@ public class TestUtil {
         }
 
         @Override
-        public Page deleteTuple(TransactionId tid, Tuple t) {
+        public ArrayList<Page> deleteTuple(TransactionId tid, Tuple t) {
             throw new RuntimeException("not implemented");
         }
 
@@ -261,7 +261,7 @@ public class TestUtil {
         }
 
         @Override
-		public TupleDesc getTupleDesc() {			
+		public TupleDesc getTupleDesc() {
 			return td;
 		}
     }

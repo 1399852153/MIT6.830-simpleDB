@@ -22,7 +22,8 @@ public class StringAggregatorTest extends SimpleDbTestBase {
   /**
    * Initialize each unit test
    */
-  @Before public void createTupleList() throws Exception {
+  @Before
+  public void createTupleList() throws Exception {
     this.scan1 = TestUtil.createTupleList(width1,
         new Object[] { 1, "a",
                     1, "b",
@@ -45,7 +46,8 @@ public class StringAggregatorTest extends SimpleDbTestBase {
   /**
    * Test String.mergeTupleIntoGroup() and iterator() over a COUNT
    */
-  @Test public void mergeCount() throws Exception {
+  @Test
+  public void mergeCount() throws Exception {
     scan1.open();
     StringAggregator agg = new StringAggregator(0, Type.INT_TYPE, 1, Aggregator.Op.COUNT);
 
@@ -60,7 +62,8 @@ public class StringAggregatorTest extends SimpleDbTestBase {
   /**
    * Test StringAggregator.iterator() for DbIterator behaviour
    */
-  @Test public void testIterator() throws Exception {
+  @Test
+  public void testIterator() throws Exception {
     // first, populate the aggregator via sum over scan1
     scan1.open();
     StringAggregator agg = new StringAggregator(0, Type.INT_TYPE, 1, Aggregator.Op.COUNT);

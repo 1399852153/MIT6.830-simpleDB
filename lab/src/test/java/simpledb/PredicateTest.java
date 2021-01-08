@@ -9,7 +9,7 @@ import simpledb.util.Utility;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class PredicateTest extends SimpleDbTestBase{
+public class PredicateTest extends SimpleDbTestBase {
 
   /**
    * Unit test for Predicate.filter()

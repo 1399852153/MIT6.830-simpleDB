@@ -1,8 +1,12 @@
-package simpledb.model;
+package simpledb.model.iterator.db;
 
 import simpledb.enums.Type;
 import simpledb.exception.DbException;
 import simpledb.exception.TransactionAbortedException;
+import simpledb.model.Database;
+import simpledb.model.TransactionId;
+import simpledb.model.Tuple;
+import simpledb.model.TupleDesc;
 import simpledb.model.dbfile.DbFile;
 import simpledb.model.iterator.db.DbIterator;
 import simpledb.model.iterator.dbfile.DbFileIterator;
