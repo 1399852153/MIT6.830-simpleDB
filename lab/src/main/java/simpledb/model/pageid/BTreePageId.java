@@ -2,18 +2,36 @@ package simpledb.model.pageid;
 
 import simpledb.util.BufferPool;
 
-/** Unique identifier for BTreeInternalPage, BTreeLeafPage, BTreeHeaderPage
- *  and BTreeRootPtrPage objects. 
+/**
+ * Unique identifier for BTreeInternalPage, BTreeLeafPage, BTreeHeaderPage
+ * and BTreeRootPtrPage objects.
  */
 public class BTreePageId implements PageId {
 
+	/**
+	 * 根节点
+	 * */
 	public final static int ROOT_PTR = 0;
+	/**
+	 * 内部节点
+	 * */
 	public final static int INTERNAL = 1;
+	/**
+	 * 叶子节点
+	 * */
 	public final static int LEAF = 2;
+	/**
+	 * 头结点
+	 * */
 	public final static int HEADER = 3;
 
 	private final int tableId;
 	private final int pgNo;
+
+	/**
+	 * 当前页对应的，b树索引类型
+	 * ROOT_PTR/INTERNAL/LEAF/HEADER
+	 * */
 	private int pgcateg;
 
 	/**

@@ -98,7 +98,9 @@ public class BTreeFile implements DbFile {
 		try {
 			bis = new BufferedInputStream(new FileInputStream(f));
 			if(id.pgcateg() == BTreePageId.ROOT_PTR) {
+				// 根节点
 				byte pageBuf[] = new byte[BTreeRootPtrPage.getPageSize()];
+				// 从文件的头部开始读(偏移为0)
 				int retval = bis.read(pageBuf, 0, BTreeRootPtrPage.getPageSize());
 				if (retval == -1) {
 					throw new IllegalArgumentException("Read past end of table");
@@ -112,7 +114,10 @@ public class BTreeFile implements DbFile {
 				return p;
 			}
 			else {
+				// 非根节点
+
 				byte pageBuf[] = new byte[BufferPool.getPageSize()];
+				// 根据缓冲区页大小 * 页号 计算偏移
 				if (bis.skip(BTreeRootPtrPage.getPageSize() + (id.pageNumber()-1) * BufferPool.getPageSize()) != 
 						BTreeRootPtrPage.getPageSize() + (id.pageNumber()-1) * BufferPool.getPageSize()) {
 					throw new IllegalArgumentException(
@@ -128,14 +133,17 @@ public class BTreeFile implements DbFile {
 				}
 				Debug.log(1, "BTreeFile.readPage: read page %d", id.pageNumber());
 				if(id.pgcateg() == BTreePageId.INTERNAL) {
+					// 内部节点
 					BTreeInternalPage p = new BTreeInternalPage(id, pageBuf, keyField);
 					return p;
 				}
 				else if(id.pgcateg() == BTreePageId.LEAF) {
+					// 叶子节点
 					BTreeLeafPage p = new BTreeLeafPage(id, pageBuf, keyField);
 					return p;
 				}
 				else { // id.pgcateg() == BTreePageId.HEADER
+					// 头节点
 					BTreeHeaderPage p = new BTreeHeaderPage(id, pageBuf);
 					return p;
 				}
@@ -210,9 +218,12 @@ public class BTreeFile implements DbFile {
 			Field f) throws DbException, TransactionAbortedException {
 		// some code goes here
         if (pid.pgcateg() == BTreePageId.LEAF) {
+        	// 查找到了最终的叶子节点类型的页
             return (BTreeLeafPage) this.getPage(tid, dirtypages, pid, perm);
         } else {
             // internal and page can not be empty
+
+			// B+树位于中间的内部页
             BTreePageId nextSearchId;
             BTreeInternalPage searchPg = (BTreeInternalPage) this.getPage(tid, dirtypages, pid, Permissions.READ_ONLY);
 
@@ -225,19 +236,27 @@ public class BTreeFile implements DbFile {
             }
 
             if (f == null) {
+            	// If f is null, it finds the left-most leaf page -- used for the iterator
                 nextSearchId = entry.getLeftChild();
             } else {
+            	// f不为null，是有针对性的查找对应的leafPage
                 while (f.compare(Predicate.Op.GREATER_THAN, entry.getKey()) && it.hasNext()) {
+                	// 在当前页中迭代，尝试查找到一个比f更大的项
                     entry = it.next();
                 }
+                // 跳出循环，说明找到了一个比f更大的项或者到了最右边
 
                 if (f.compare(Predicate.Op.LESS_THAN_OR_EQ, entry.getKey())) {
+                	// f<=找到的entry，去左孩子节点页寻找
                     nextSearchId = entry.getLeftChild();
                 } else {
                 	// greater than the last one
+					// f比当前页中最后的一项更大，去右孩子节点寻找
                     nextSearchId = entry.getRightChild();
                 }
             }
+
+            // 递归查找B+树更下一层的页(nextSearchId)
             return findLeafPage(tid, dirtypages, nextSearchId, perm, f);
         }
 	}
@@ -254,10 +273,9 @@ public class BTreeFile implements DbFile {
 	 * @return the left-most leaf page possibly containing the key field f
 	 * 
 	 */
-	BTreeLeafPage findLeafPage(TransactionId tid, BTreePageId pid, Permissions perm,
-			Field f) 
-					throws DbException, TransactionAbortedException {
-		return findLeafPage(tid, new HashMap<PageId, Page>(), pid, perm, f);
+	BTreeLeafPage findLeafPage(TransactionId tid, BTreePageId pid, Permissions perm, Field f)
+			throws DbException, TransactionAbortedException {
+		return findLeafPage(tid, new HashMap<>(), pid, perm, f);
 	}
 
 	/**
@@ -637,11 +655,15 @@ public class BTreeFile implements DbFile {
 	private Page getPage(TransactionId tid, HashMap<PageId, Page> dirtypages, BTreePageId pid, Permissions perm) 
 			throws DbException, TransactionAbortedException {
 		if(dirtypages.containsKey(pid)) {
+			// 尝试在脏页中找到了对应的page页
 			return dirtypages.get(pid);
 		}
 		else {
+			// 从bufferPool中查找
 			Page p = Database.getBufferPool().getPage(tid, pid, perm);
 			if(perm == Permissions.READ_WRITE) {
+				// 如果权限是可写的话,说明很有可能在后面的事务中会被修改(提前加入脏页缓存)
+				// 索引的修改可能会连锁的修改叶节点向上的各个祖先节点(对应的页都将被修改)
 				dirtypages.put(pid, p);
 			}
 			return p;
