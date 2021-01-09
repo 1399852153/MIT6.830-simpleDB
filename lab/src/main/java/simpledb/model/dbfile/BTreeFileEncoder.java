@@ -215,7 +215,7 @@ public class BTreeFileEncoder {
 		HeapFile heapf = Utility.openHeapFile(numFields, hFile);
 
 		// read all the tuples from the heap file and sort them on the keyField
-		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
+		ArrayList<Tuple> tuples = new ArrayList<>();
 		TransactionId tid = new TransactionId();
 		DbFileIterator it = Database.getCatalog().getDatabaseFile(heapf.getId()).iterator(tid);
 		it.open();
@@ -255,8 +255,8 @@ public class BTreeFileEncoder {
 		// We wait until we have two full pages of tuples before writing out the first page
 		// so that we will not end up with any pages containing less than nrecords/2 tuples
 		// (unless it's the only page)
-		ArrayList<Tuple> page1 = new ArrayList<Tuple>();
-		ArrayList<Tuple> page2 = new ArrayList<Tuple>();
+		ArrayList<Tuple> page1 = new ArrayList<>();
+		ArrayList<Tuple> page2 = new ArrayList<>();
 		BTreePageId leftSiblingId = null;
 		for(Tuple tup : tuples) {
 			if(page1.size() < nrecords) {
@@ -280,7 +280,7 @@ public class BTreeFileEncoder {
 						keyType, tableid, keyField);
 
 				page1 = page2;
-				page2 = new ArrayList<Tuple>();
+				page2 = new ArrayList<>();
 				page2.add(tup);
 			}
 		}
@@ -292,7 +292,7 @@ public class BTreeFileEncoder {
 		// For case (1), we write out the page 
 		// For case (2), we divide the remaining records equally between the last two pages,
 		// write them out, and update the parent's child pointers.
-		BTreePageId lastPid = null;
+		BTreePageId lastPid;
 		if(page2.size() == 0) {
 			// write out a page of records - this is the root page
 			byte[] lastPageBytes = convertToLeafPage(page1, npagebytes, numFields, typeAr, keyField);

@@ -42,6 +42,8 @@ public class BTreeRootPtrPage implements Page {
 		this.pid = id;
 		this.dis = new DataInputStream(new ByteArrayInputStream(data));
 
+		// rootPtr共9byte大小，其中root为前4个字节，rootCategory为第5个字节，header为后4个字节
+
 		// read in the root pointer
 		root = dis.readInt();
 		rootCategory = (int) dis.readByte();

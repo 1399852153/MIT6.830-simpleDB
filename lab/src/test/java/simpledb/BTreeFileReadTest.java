@@ -77,11 +77,13 @@ public class BTreeFileReadTest extends SimpleDbTestBase {
 	@Test
 	public void readPage() throws Exception {
 		BTreePageId rootPtrPid = new BTreePageId(f.getId(), 0, BTreePageId.ROOT_PTR);
+		// 读取出根指针文件
 		BTreeRootPtrPage rootPtr = (BTreeRootPtrPage) f.readPage(rootPtrPid);
 
 		assertEquals(1, rootPtr.getRootId().pageNumber());
 		assertEquals(BTreePageId.LEAF, rootPtr.getRootId().pgcateg());
 
+		// 根据根指针文件的内容，找到B+树的根节点所在页)
 		BTreePageId pid = new BTreePageId(f.getId(), 1, BTreePageId.LEAF);
 		BTreeLeafPage page = (BTreeLeafPage) f.readPage(pid);
 

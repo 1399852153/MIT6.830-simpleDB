@@ -9,7 +9,7 @@ import simpledb.util.BufferPool;
 public class BTreePageId implements PageId {
 
 	/**
-	 * 根节点
+	 * 根节点指针
 	 * */
 	public final static int ROOT_PTR = 0;
 	/**

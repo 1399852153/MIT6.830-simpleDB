@@ -24,13 +24,32 @@ import java.io.*;
  * @see BTreeFile
  * @see BufferPool
  *
+ * B+树的叶子节点页
  */
 public class BTreeLeafPage extends BTreePage {
-	private final byte header[];
-	private final Tuple tuples[];
+	/**
+	 * 头部位图
+	 */
+	private final byte[] header;
+
+	/**
+	 * 所保存的数组列表
+	 * */
+	private final Tuple[] tuples;
+
+	/**
+	 * 最大插槽数目
+	 * */
 	private final int numSlots;
-	
+
+	/**
+	 * 左兄弟叶子节点页指针 0代表null
+	 * */
 	private int leftSibling; // leaf node or 0
+
+	/**
+	 * 有兄弟叶子节点页指针 0代表null
+	 * */
 	private int rightSibling; // leaf node or 0
 
 	/**
@@ -56,12 +75,14 @@ public class BTreeLeafPage extends BTreePage {
 	 */
 	public BTreeLeafPage(BTreePageId id, byte[] data, int key) throws IOException {
 		super(id, key);
+		// 计算最大插槽数
 		this.numSlots = getMaxTuples();
 		DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
 
 		// Read the parent and sibling pointers
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
+			// 从文件中读取出最开始的int数据，是为双亲节点指针
 			this.parent = ((IntField) f).getValue();
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
@@ -69,6 +90,7 @@ public class BTreeLeafPage extends BTreePage {
 
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
+			// 从文件中读取出第二个int数据，是为左兄弟页指针
 			this.leftSibling = ((IntField) f).getValue();
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
@@ -76,6 +98,7 @@ public class BTreeLeafPage extends BTreePage {
 
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
+			// 从文件中读取出第三个int数据，是为右兄弟页指针
 			this.rightSibling = ((IntField) f).getValue();
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
@@ -83,14 +106,18 @@ public class BTreeLeafPage extends BTreePage {
 
 		// allocate and read the header slots of this page
 		header = new byte[getHeaderSize()];
-		for (int i=0; i<header.length; i++)
+		for (int i=0; i<header.length; i++) {
+			// 读取出后续的header位图
 			header[i] = dis.readByte();
+		}
 
 		tuples = new Tuple[numSlots];
 		try{
 			// allocate and read the actual records of this page
-			for (int i=0; i<tuples.length; i++)
-				tuples[i] = readNextTuple(dis,i);
+			for (int i=0; i<tuples.length; i++) {
+				// 读取并解析出tuple数据，加入tuples中
+				tuples[i] = readNextTuple(dis, i);
+			}
 		}catch(NoSuchElementException e){
 			e.printStackTrace();
 		}
@@ -102,10 +129,13 @@ public class BTreeLeafPage extends BTreePage {
 	/** 
 	 * Retrieve the maximum number of tuples this page can hold.
 	 */
-	public int getMaxTuples() {        
+	public int getMaxTuples() {
+		// td.getSize() * 8 = 每一个tuple的bit位(Byte数 * 8) + 1位的header位图 => 每一个Tuple占用的空间
 		int bitsPerTupleIncludingHeader = td.getSize() * 8 + 1;
 		// extraBits are: left sibling pointer, right sibling pointer, parent pointer
-		int extraBits = 3 * INDEX_SIZE * 8; 
+		// 3 * INDEX_SIZE * 8 = 三个指针(左、右兄弟以及双亲节点指针)占据的bit数(Byte数 * 8)
+		int extraBits = 3 * INDEX_SIZE * 8;
+		// BTreeLeafPage页面可以容纳的最大插槽数 = 缓冲页面大小 - 额外的extraBits/每一个Tuple占用的空间
 		int tuplesPerPage = (BufferPool.getPageSize()*8 - extraBits) / bitsPerTupleIncludingHeader; //round down
 		return tuplesPerPage;
 	}
@@ -116,8 +146,9 @@ public class BTreeLeafPage extends BTreePage {
 	private int getHeaderSize() {        
 		int tuplesPerPage = getMaxTuples();
 		int hb = (tuplesPerPage / 8);
-		if (hb * 8 < tuplesPerPage) hb++;
-
+		if (hb * 8 < tuplesPerPage){
+			hb++;
+		}
 		return hb;
 	}
 
@@ -125,7 +156,7 @@ public class BTreeLeafPage extends BTreePage {
         -- used by recovery */
 	public BTreeLeafPage getBeforeImage(){
 		try {
-			byte[] oldDataRef = null;
+			byte[] oldDataRef;
 			synchronized(oldDataLock)
 			{
 				oldDataRef = oldData;
@@ -153,6 +184,8 @@ public class BTreeLeafPage extends BTreePage {
 		// if associated bit is not set, read forward to the next tuple, and
 		// return null.
 		if (!isSlotUsed(slotId)) {
+			// header中显示对应的插槽是未使用，无数据的
+			// 直接跳过td.getSize大小的数据
 			for (int i=0; i<td.getSize(); i++) {
 				try {
 					dis.readByte();
@@ -160,24 +193,29 @@ public class BTreeLeafPage extends BTreePage {
 					throw new NoSuchElementException("error reading empty tuple");
 				}
 			}
+			// 未使用的插槽返回null
 			return null;
-		}
+		}else{
+			// read fields in the tuple
 
-		// read fields in the tuple
-		Tuple t = new Tuple(td);
-		RecordId rid = new RecordId(pid, slotId);
-		t.setRecordId(rid);
-		try {
-			for (int j=0; j<td.numFields(); j++) {
-				Field f = td.getFieldType(j).parse(dis);
-				t.setField(j, f);
+			// header中显示对应的插槽是已使用，有数据的
+
+			Tuple t = new Tuple(td);
+			RecordId rid = new RecordId(pid, slotId);
+			// 生成当前表架构的tuple骨架
+			t.setRecordId(rid);
+			try {
+				for (int j=0; j<td.numFields(); j++) {
+					// 读取并解析出对应的数据内容
+					Field f = td.getFieldType(j).parse(dis);
+					t.setField(j, f);
+				}
+			} catch (java.text.ParseException e) {
+				throw new NoSuchElementException("parsing error!");
 			}
-		} catch (java.text.ParseException e) {
-			e.printStackTrace();
-			throw new NoSuchElementException("parsing error!");
+			// 读取到了有效数据，将新的tuple返回
+			return t;
 		}
-
-		return t;
 	}
 
 	/**
@@ -431,11 +469,13 @@ public class BTreeLeafPage extends BTreePage {
 	 * Returns the number of tuples currently stored on this page
 	 */
 	public int getNumTuples() {
+		// 最大插槽 - 空插槽 = 有数据的插槽数
 		return numSlots - getNumEmptySlots();
 	}
 
 	/**
 	 * Returns the number of empty slots on this page.
+	 * 空插槽的数量
 	 */
 	public int getNumEmptySlots() {
 		int cnt = 0;
