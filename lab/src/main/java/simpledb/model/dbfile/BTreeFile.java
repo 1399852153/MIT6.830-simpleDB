@@ -177,7 +177,8 @@ public class BTreeFile implements DbFile {
 			rf.close();
 		}
 		else {
-			rf.seek(BTreeRootPtrPage.getPageSize() + (page.getId().pageNumber()-1) * BufferPool.getPageSize());
+			// 页下标是从1开始的 需要seek跳转到BTreeRootPtrPage之后的第N页
+			rf.seek(BTreeRootPtrPage.getPageSize() + (long) (page.getId().pageNumber() - 1) * BufferPool.getPageSize());
 			rf.write(data);
 			rf.close();
 		}

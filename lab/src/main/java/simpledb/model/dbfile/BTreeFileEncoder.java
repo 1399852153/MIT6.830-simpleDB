@@ -224,7 +224,7 @@ public class BTreeFileEncoder {
 			tuples.add(tup);
 		}
 		it.close();
-		Collections.sort(tuples, new TupleComparator(keyField));
+		tuples.sort(new TupleComparator(keyField));
 
 		// add the tuples to B+ tree file
 		BTreeFile bf = BTreeUtility.openBTreeFile(numFields, bFile, keyField);
@@ -266,6 +266,8 @@ public class BTreeFileEncoder {
 				page2.add(tup);
 			}
 			else {
+				// 最简单的情况下不会走到这里（tuples小于两页，page1+page2正好构成root节点的左右孩子页）
+
 				// write out a page of records
 				byte[] leafPageBytes = convertToLeafPage(page1, npagebytes, numFields, typeAr, keyField);
 				BTreePageId leafPid = new BTreePageId(tableid, bf.numPages() + 1, BTreePageId.LEAF);
@@ -304,8 +306,8 @@ public class BTreeFileEncoder {
 		else {
 			// split the remaining tuples in half
 			int remainingTuples = page1.size() + page2.size();
-			ArrayList<Tuple> secondToLastPg = new ArrayList<Tuple>();
-			ArrayList<Tuple> lastPg = new ArrayList<Tuple>();
+			ArrayList<Tuple> secondToLastPg = new ArrayList<>();
+			ArrayList<Tuple> lastPg = new ArrayList<>();
 			secondToLastPg.addAll(page1.subList(0, remainingTuples/2));
 			lastPg.addAll(page1.subList(remainingTuples/2, page1.size()));
 			lastPg.addAll(page2);
@@ -473,7 +475,7 @@ public class BTreeFileEncoder {
 			BTreeFile bf, BTreeEntry e, int level, int nentries, int npagebytes, Type keyType, 
 			int tableid, int keyField) throws IOException {
 		while(entries.size() <= level) {
-			entries.add(new ArrayList<BTreeEntry>());
+			entries.add(new ArrayList<>());
 		}
 
 		int childPageCategory = (level == 0 ? BTreePageId.LEAF : BTreePageId.INTERNAL);
@@ -484,8 +486,7 @@ public class BTreeFileEncoder {
 			entries.get(level).set(size-1, new BTreeEntry(prev.getKey(), prev.getLeftChild(), e.getLeftChild()));
 			if(size == nentries * 2 + 1) {
 				// write out a page of entries
-				ArrayList<BTreeEntry> pageEntries = new ArrayList<BTreeEntry>();
-				pageEntries.addAll(entries.get(level).subList(0, nentries));
+				ArrayList<BTreeEntry> pageEntries = new ArrayList<>(entries.get(level).subList(0, nentries));
 				byte[] internalPageBytes = convertToInternalPage(pageEntries, npagebytes, keyType, childPageCategory);
 				BTreePageId internalPid = new BTreePageId(tableid, bf.numPages() + 1, BTreePageId.INTERNAL);
 				bf.writePage(new BTreeInternalPage(internalPid, internalPageBytes, keyField));
@@ -494,8 +495,7 @@ public class BTreeFileEncoder {
 				BTreeEntry pushUpEntry = new BTreeEntry(entries.get(level).get(nentries).getKey(), internalPid, null);
 				updateEntries(entries, bf, pushUpEntry, level + 1, nentries, npagebytes, 
 						keyType, tableid, keyField);
-				ArrayList<BTreeEntry> remainingEntries = new ArrayList<BTreeEntry>();
-				remainingEntries.addAll(entries.get(level).subList(nentries+1, size));
+				ArrayList<BTreeEntry> remainingEntries = new ArrayList<>(entries.get(level).subList(nentries + 1, size));
 				entries.get(level).clear();
 				entries.get(level).addAll(remainingEntries);
 			}
@@ -518,18 +518,24 @@ public class BTreeFileEncoder {
 			int numFields, Type[] typeAr, int keyField)
 					throws IOException {
 		int nrecbytes = 0;
+		// 计算每一个tuple所占用的byte大小
 		for (int i = 0; i < numFields ; i++) {
 			nrecbytes += typeAr[i].getLen();
 		}
 		// pointerbytes: left sibling pointer, right sibling pointer, parent pointer
-		int pointerbytes = 3 * BTreeLeafPage.INDEX_SIZE; 
+		// 指针所占用的byte大小（左/右兄弟、双亲）
+		int pointerbytes = 3 * BTreeLeafPage.INDEX_SIZE;
+		// 每一页可以容纳的最大记录数 = （每一页的bit大小 - 当前页的三个指针bit大小）/ （每个tuple的bit大小 + 1bit的头部位图空间）
 		int nrecords = (npagebytes * 8 - pointerbytes * 8) /  (nrecbytes * 8 + 1);  //floor comes for free
 
 		//  per record, we need one bit; there are nrecords per page, so we need
 		// nrecords bits, i.e., ((nrecords/32)+1) integers.
+		// 头部所占空间的字节大小
 		int nheaderbytes = (nrecords / 8);
-		if (nheaderbytes * 8 < nrecords)
-			nheaderbytes++;  //ceiling
+		if (nheaderbytes * 8 < nrecords) {
+			nheaderbytes++;  //ceiling 不足则必须向上取整，冗余一点空间
+		}
+		// 头部所占空间的bit大小
 		int nheaderbits = nheaderbytes * 8;
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(npagebytes);
@@ -542,30 +548,38 @@ public class BTreeFileEncoder {
 		// written and 0 for empty slots.
 
 		int recordcount = tuples.size();
-		if (recordcount > nrecords)
+		if (recordcount > nrecords) {
 			recordcount = nrecords;
+		}
 
+		// 1. 按照parent、left sibling、right sibling的顺序写入三个指针
 		dos.writeInt(0); // parent pointer
 		dos.writeInt(0); // left sibling pointer
 		dos.writeInt(0); // right sibling pointer
 
-		int i = 0;
+		int i;
 		byte headerbyte = 0;
 
+		// 2. 设置头部位图
 		for (i=0; i<nheaderbits; i++) {
-			if (i < recordcount)
+			if (i < recordcount) {
+				// i<recordcount代表对应数据存在
 				headerbyte |= (1 << (i % 8));
-
+			}
 			if (((i+1) % 8) == 0) {
+				// 每满一个字节（8bit），写入一次
 				dos.writeByte(headerbyte);
 				headerbyte = 0;
 			}
 		}
 
-		if (i % 8 > 0)
+		if (i % 8 > 0){
+			// 写入headers最后末尾的一个byte
 			dos.writeByte(headerbyte);
+		}
 
-		Collections.sort(tuples, new TupleComparator(keyField));
+		// 3. 写入排序后的tuple集合
+		tuples.sort(new TupleComparator(keyField));
 		for(int t = 0; t < recordcount; t++) {
 			TupleDesc td = tuples.get(t).getTupleDesc();
 			for(int j = 0; j < td.numFields(); j++) {
@@ -574,8 +588,10 @@ public class BTreeFileEncoder {
 		}
 
 		// pad the rest of the page with zeroes
-		for (i=0; i<(npagebytes - (recordcount * nrecbytes + nheaderbytes + pointerbytes)); i++)
+		// 4. 一个page页剩余的空间用0填充
+		for (i=0; i<(npagebytes - (recordcount * nrecbytes + nheaderbytes + pointerbytes)); i++) {
 			dos.writeByte(0);
+		}
 
 		return baos.toByteArray();
 	}
