@@ -60,24 +60,27 @@ public class BTreeInternalPage extends BTreePage {
 	 */
 	public BTreeInternalPage(BTreePageId id, byte[] data, int key) throws IOException {
 		super(id, key);
+		// 能容纳key数量的最大插槽数
 		this.numSlots = getMaxEntries() + 1;
 		DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
 
 		// Read the parent pointer
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
+			// 读取parent
 			this.parent = ((IntField) f).getValue();
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
 		}
 
 		// read the child page category
-		childCategory = (int) dis.readByte();
+		childCategory = dis.readByte();
 
-		// allocate and read the header slots of this page
+		// allocate and read the header slots of this page 读取header
 		header = new byte[getHeaderSize()];
-		for (int i=0; i<header.length; i++)
+		for (int i=0; i<header.length; i++) {
 			header[i] = dis.readByte();
+		}
 
 		keys = new Field[numSlots];
 		try{
@@ -85,8 +88,9 @@ public class BTreeInternalPage extends BTreePage {
 			// start from 1 because the first key slot is not used
 			// since a node with m keys has m+1 pointers
 			keys[0] = null;
-			for (int i=1; i<keys.length; i++)
-				keys[i] = readNextKey(dis,i);
+			for (int i=1; i<keys.length; i++) {
+				keys[i] = readNextKey(dis, i);
+			}
 		}catch(NoSuchElementException e){
 			e.printStackTrace();
 		}
@@ -94,8 +98,9 @@ public class BTreeInternalPage extends BTreePage {
 		children = new int[numSlots];
 		try{
 			// allocate and read the child pointers of this page
-			for (int i=0; i<children.length; i++)
-				children[i] = readNextChild(dis,i);
+			for (int i=0; i<children.length; i++) {
+				children[i] = readNextChild(dis, i);
+			}
 		}catch(NoSuchElementException e){
 			e.printStackTrace();
 		}
@@ -109,10 +114,12 @@ public class BTreeInternalPage extends BTreePage {
  	 */
 	public int getMaxEntries() {        
 		int keySize = td.getFieldType(keyField).getLen();
+		// 每一个key所占用的bit位+索引位+1位header位
 		int bitsPerEntryIncludingHeader = keySize * 8 + INDEX_SIZE * 8 + 1;
 		// extraBits are: one parent pointer, 1 byte for child page category, 
 		// one extra child pointer (node with m entries has m+1 pointers to children), 1 bit for extra header
-		int extraBits = 2 * INDEX_SIZE * 8 + 8 + 1; 
+		int extraBits = 2 * INDEX_SIZE * 8 + 8 + 1;
+		// 每一个页所能容纳的最大entry数
 		int entriesPerPage = (BufferPool.getPageSize()*8 - extraBits) / bitsPerEntryIncludingHeader; //round down
 		return entriesPerPage;
 	}
@@ -163,6 +170,7 @@ public class BTreeInternalPage extends BTreePage {
 		if (!isSlotUsed(slotId)) {
 			for (int i=0; i<td.getFieldType(keyField).getLen(); i++) {
 				try {
+					// 当前插槽没有被使用，跳过对应的byte
 					dis.readByte();
 				} catch (IOException e) {
 					throw new NoSuchElementException("error reading empty key");
@@ -172,8 +180,9 @@ public class BTreeInternalPage extends BTreePage {
 		}
 
 		// read the key field
-		Field f = null;
+		Field f;
 		try {
+			// 读取解析出对应的字段
 			f = td.getFieldType(keyField).parse(dis);
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
@@ -201,7 +210,7 @@ public class BTreeInternalPage extends BTreePage {
 		}
 
 		// read child pointer
-		int child = -1;
+		int child;
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
 			child = ((IntField) f).getValue();
@@ -246,9 +255,9 @@ public class BTreeInternalPage extends BTreePage {
 		}
 
 		// create the header of the page
-		for (int i=0; i<header.length; i++) {
+		for (byte b : header) {
 			try {
-				dos.writeByte(header[i]);
+				dos.writeByte(b);
 			} catch (IOException e) {
 				// this really shouldn't happen
 				e.printStackTrace();
@@ -345,6 +354,7 @@ public class BTreeInternalPage extends BTreePage {
 			throw new DbException("tried to delete entry on invalid page or table");
 		if (!isSlotUsed(rid.tupleno()))
 			throw new DbException("tried to delete null entry.");
+
 		if(deleteRightChild) {
 			markSlotUsed(rid.tupleno(), false); 
 		}
@@ -516,7 +526,7 @@ public class BTreeInternalPage extends BTreePage {
 
 		// shift entries back or forward to fill empty slot and make room for new entry
 		// while keeping entries in sorted order
-		int goodSlot = -1;
+		int goodSlot;
 		if(emptySlot < lessOrEqKey) {
 			for(int i = emptySlot; i < lessOrEqKey; i++) {
 				moveEntry(i+1, i);
