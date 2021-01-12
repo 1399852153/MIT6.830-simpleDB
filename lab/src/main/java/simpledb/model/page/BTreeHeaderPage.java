@@ -11,6 +11,7 @@ import simpledb.model.pageid.BTreePageId;
 import simpledb.util.BufferPool;
 
 import java.io.*;
+import java.util.Arrays;
 
 /**
  * Each instance of BTreeHeaderPage stores data for one page of a BTreeFile and 
@@ -78,8 +79,8 @@ public class BTreeHeaderPage implements Page {
 	 * Initially mark all slots in the header used.
 	 */
 	public void init() {
-		for (int i=0; i<header.length; i++)
-			header[i] = (byte) 0xFF;
+		// 整个header的bit位全部用1填充
+		Arrays.fill(header, (byte) 0xFF);
 	}
 
 	/**
@@ -161,9 +162,9 @@ public class BTreeHeaderPage implements Page {
 		}
 
 		// create the header of the page
-		for (int i=0; i<header.length; i++) {
+		for (byte b : header) {
 			try {
-				dos.writeByte(header[i]);
+				dos.writeByte(b);
 			} catch (IOException e) {
 				// this really shouldn't happen
 				e.printStackTrace();
@@ -291,10 +292,12 @@ public class BTreeHeaderPage implements Page {
 		int headerbyte = (i - headerbit) / 8;
 
 		Debug.log(1, "BTreeHeaderPage.setSlot: setting slot %d to %b", i, value);
-		if(value)
+		if(value) {
 			header[headerbyte] |= 1 << headerbit;
-		else
+		}
+		else {
 			header[headerbyte] &= (0xFF ^ (1 << headerbit));
+		}
 	}
 
 	/**

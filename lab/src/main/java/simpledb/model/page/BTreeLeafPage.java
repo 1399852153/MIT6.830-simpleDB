@@ -325,7 +325,9 @@ public class BTreeLeafPage extends BTreePage {
 			throw new DbException("tried to delete tuple on invalid page or table");
 		if (!isSlotUsed(rid.tupleno()))
 			throw new DbException("tried to delete null tuple.");
+		// 删除tuple时，将header对应位置空
 		markSlotUsed(rid.tupleno(), false);
+		// recordId置空
 		t.setRecordId(null);
 	}
 
@@ -338,10 +340,11 @@ public class BTreeLeafPage extends BTreePage {
 	 * @param t The tuple to add.
 	 */
 	public void insertTuple(Tuple t) throws DbException {
-		if (!t.getTupleDesc().equals(td))
+		if (!t.getTupleDesc().equals(td)) {
 			throw new DbException("type mismatch, in addTuple");
+		}
 
-		// find the first empty slot 
+		// find the first empty slot 找到第一个空的可用插槽
 		int emptySlot = -1;
 		for (int i=0; i<numSlots; i++) {
 			if (!isSlotUsed(i)) {
@@ -350,38 +353,50 @@ public class BTreeLeafPage extends BTreePage {
 			}
 		}
 
-		if (emptySlot == -1)
+		if (emptySlot == -1) {
+			// 没有找到空插槽，报错
 			throw new DbException("called addTuple on page with no empty slots.");
+		}
 
 		// find the last key less than or equal to the key being inserted
 		int lessOrEqKey = -1;
 		Field key = t.getField(keyField);
 		for (int i=0; i<numSlots; i++) {
 			if(isSlotUsed(i)) {
-				if(tuples[i].getField(keyField).compare(Predicate.Op.LESS_THAN_OR_EQ, key))
+				// 找到小于或等于参数key的最左下标
+				if(tuples[i].getField(keyField).compare(Predicate.Op.LESS_THAN_OR_EQ, key)) {
 					lessOrEqKey = i;
-				else
-					break;	
+				}
+				else {
+					break;
+				}
 			}
 		}
 
 		// shift records back or forward to fill empty slot and make room for new record
 		// while keeping records in sorted order
-		int goodSlot = -1;
+		int goodSlot;
 		if(emptySlot < lessOrEqKey) {
+			// 空插槽对应的下标 < 匹配到的最左下标
 			for(int i = emptySlot; i < lessOrEqKey; i++) {
+				// emptySlot<->lessOrEqKey之间的数据进行向左的平移整理（下标i+1已使用，i未使用则向左平移一位）
 				moveRecord(i+1, i);
 			}
+			// 找到可以放下当前数据的插槽
 			goodSlot = lessOrEqKey;
 		}
 		else {
+			// 空插槽对应的下标 > 匹配到的最左下标
 			for(int i = emptySlot; i > lessOrEqKey + 1; i--) {
+				// emptySlot<->lessOrEqKey之间的数据进行向右的平移整理（下标i-1已使用，i未使用则向右平移一位）
 				moveRecord(i-1, i);
 			}
+			// 找到可以放下当前数据的插槽
 			goodSlot = lessOrEqKey + 1;
 		}
 
 		// insert new record into the correct spot in sorted order
+		// 对应插槽goodSlot存入数据，以及设置对应的关系
 		markSlotUsed(goodSlot, true);
 		Debug.log(1, "BTreeLeafPage.insertTuple: new tuple, tableId = %d pageId = %d slotId = %d", pid.getTableId(), pid.pageNumber(), goodSlot);
 		RecordId rid = new RecordId(pid, goodSlot);
@@ -394,6 +409,7 @@ public class BTreeLeafPage extends BTreePage {
 	 * headers and RecordId
 	 */
 	private void moveRecord(int from, int to) {
+		// 必须from不为空且to为空，则将from插槽中的数据迁移进to插槽中
 		if(!isSlotUsed(to) && isSlotUsed(from)) {
 			markSlotUsed(to, true);
 			RecordId rid = new RecordId(pid, to);
@@ -479,9 +495,11 @@ public class BTreeLeafPage extends BTreePage {
 	 */
 	public int getNumEmptySlots() {
 		int cnt = 0;
-		for(int i=0; i<numSlots; i++)
-			if(!isSlotUsed(i))
+		for(int i=0; i<numSlots; i++) {
+			if (!isSlotUsed(i)) {
 				cnt++;
+			}
+		}
 		return cnt;
 	}
 

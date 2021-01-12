@@ -648,19 +648,22 @@ public class BTreeFileEncoder {
 	 * @return a byte array which can be passed to the BTreeInternalPage constructor
 	 * @throws IOException
 	 */
-	public static byte[] convertToInternalPage(ArrayList<BTreeEntry> entries, int npagebytes,
-			Type keyType, int childPageCategory)
+	public static byte[] convertToInternalPage(ArrayList<BTreeEntry> entries, int npagebytes, Type keyType, int childPageCategory)
 					throws IOException {
+		// 内部页中每个entry占用的byte大小
 		int nentrybytes = keyType.getLen() + BTreeInternalPage.INDEX_SIZE;
 		// pointerbytes: one extra child pointer, parent pointer, child page category
-		int pointerbytes = 2 * BTreeLeafPage.INDEX_SIZE + 1; 
+		int pointerbytes = 2 * BTreeLeafPage.INDEX_SIZE + 1;
+		// 一个InternalPage最大能够容纳的entry数
 		int nentries = (npagebytes * 8 - pointerbytes * 8 - 1) /  (nentrybytes * 8 + 1);  //floor comes for free
 
-		//  per entry, we need one bit; there are nentries per page, so we need
+		// per entry, we need one bit; there are nentries per page, so we need
 		// nentries bits, plus 1 for the extra child pointer.
 		int nheaderbytes = (nentries + 1) / 8;
-		if (nheaderbytes * 8 < nentries + 1)
+		if (nheaderbytes * 8 < nentries + 1) {
 			nheaderbytes++;  //ceiling
+		}
+		// 计算出header所需要的的bit数
 		int nheaderbits = nheaderbytes * 8;
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(npagebytes);
@@ -672,13 +675,15 @@ public class BTreeFileEncoder {
 		// in the header, write a 1 for bits that correspond to entries we've
 		// written and 0 for empty slots.
 		int entrycount = entries.size();
-		if (entrycount > nentries)
+		if (entrycount > nentries) {
 			entrycount = nentries;
+		}
 
+		// 1. 首先写入双亲节点指针和childPageCategory
 		dos.writeInt(0); // parent pointer
 		dos.writeByte((byte) childPageCategory);
 
-		int i = 0;
+		int i;
 		byte headerbyte = 0;
 
 		for (i=0; i<nheaderbits; i++) {
@@ -690,26 +695,32 @@ public class BTreeFileEncoder {
 				headerbyte = 0;
 			}
 		}
-
-		if (i % 8 > 0)
+		// 2. 写入headers
+		if (i % 8 > 0) {
 			dos.writeByte(headerbyte);
+		}
 
-		Collections.sort(entries, new EntryComparator());
+		// 3. 写入排序后的tuple
+		entries.sort(new EntryComparator());
 		for(int e = 0; e < entrycount; e++) {
 			entries.get(e).getKey().serialize(dos);
 		}
 
+		// 4. 剩余的索引key空间用0填充（实际的数据量entrycount少于一页可容纳的最大数nentries）
 		for(int e = entrycount; e < nentries; e++) {
 			for (int j=0; j<keyType.getLen(); j++) {
 				dos.writeByte(0);
 			}
 		}
 
+		// 5. 写入左孩子的页号（头节点）
 		dos.writeInt(entries.get(0).getLeftChild().pageNumber());
 		for(int e = 0; e < entrycount; e++) {
+			// 按照顺序写入后续的每个右孩子节点指针页号
 			dos.writeInt(entries.get(e).getRightChild().pageNumber());
 		}
 
+		// 6. 剩余的页号空间用0填充（实际的数据量entrycount少于一页可容纳的最大数nentries）
 		for(int e = entrycount; e < nentries; e++) {
 			for (int j=0; j<BTreeInternalPage.INDEX_SIZE; j++) {
 				dos.writeByte(0);
@@ -717,8 +728,10 @@ public class BTreeFileEncoder {
 		}
 
 		// pad the rest of the page with zeroes
-		for (i=0; i<(npagebytes - (nentries * nentrybytes + nheaderbytes + pointerbytes)); i++)
+		// 最后剩余的空间用0填充
+		for (i=0; i<(npagebytes - (nentries * nentrybytes + nheaderbytes + pointerbytes)); i++) {
 			dos.writeByte(0);
+		}
 
 		return baos.toByteArray();
 
