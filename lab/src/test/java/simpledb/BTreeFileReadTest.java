@@ -122,7 +122,7 @@ public class BTreeFileReadTest extends SimpleDbTestBase {
 	public void testIteratorClose() throws Exception {
 		// make more than 1 page. Previous closed iterator would start fetching
 		// from page 1.
-		BTreeFile twoLeafPageFile = BTreeUtility.createRandomBTreeFile(2, 1520,
+		BTreeFile twoLeafPageFile = BTreeUtility.createRandomBTreeFile(2, 520,
 				null, null, 0);
 
 		// there should be 3 pages - two leaf pages and one internal page (the root)

@@ -36,7 +36,7 @@ public class BTreeScanTest extends SimpleDbTestBase {
     	for (int columns : columnSizes) {
     		int keyField = r.nextInt(columns);
             for (int rows : rowSizes) {
-                ArrayList<ArrayList<Integer>> tuples = new ArrayList<ArrayList<Integer>>();
+                ArrayList<ArrayList<Integer>> tuples = new ArrayList<>();
                 BTreeFile f = BTreeUtility.createRandomBTreeFile(columns, rows, null, tuples, keyField);
                 BTreeScan scan = new BTreeScan(tid, f.getId(), "table", null);
                 SystemTestUtil.matchTuples(scan, tuples);
@@ -93,7 +93,7 @@ public class BTreeScanTest extends SimpleDbTestBase {
     /** Test that rewinding a BTreeScan iterator works. */
     @Test
     public void testRewind() throws IOException, DbException, TransactionAbortedException {
-        ArrayList<ArrayList<Integer>> tuples = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> tuples = new ArrayList<>();
         int keyField = r.nextInt(2);
         BTreeFile f = BTreeUtility.createRandomBTreeFile(2, 1000, null, tuples, keyField);
         Collections.sort(tuples, new TupleComparator(keyField));
@@ -121,14 +121,14 @@ public class BTreeScanTest extends SimpleDbTestBase {
     @Test
     public void testRewindPredicates() throws IOException, DbException, TransactionAbortedException {
     	// Create the table
-        ArrayList<ArrayList<Integer>> tuples = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> tuples = new ArrayList<>();
         int keyField = r.nextInt(3);
         BTreeFile f = BTreeUtility.createRandomBTreeFile(3, 1000, null, tuples, keyField);
         Collections.sort(tuples, new TupleComparator(keyField));
                 
         // EQUALS
         TransactionId tid = new TransactionId();
-        ArrayList<ArrayList<Integer>> tuplesFiltered = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> tuplesFiltered = new ArrayList<>();
         IndexPredicate ipred = new IndexPredicate(Predicate.Op.EQUALS, new IntField(r.nextInt(BTreeUtility.MAX_RAND_VALUE)));
         Iterator<ArrayList<Integer>> it = tuples.iterator();
         while(it.hasNext()) {
@@ -174,10 +174,10 @@ public class BTreeScanTest extends SimpleDbTestBase {
         }
 
         scan.rewind();
-        for (int i = 0; i < tuplesFiltered.size(); ++i) {
+        for (ArrayList<Integer> integers : tuplesFiltered) {
             assertTrue(scan.hasNext());
             Tuple t = scan.next();
-            assertEquals(tuplesFiltered.get(i), SystemTestUtil.tupleToList(t));
+            assertEquals(integers, SystemTestUtil.tupleToList(t));
         }
         scan.close();
         
@@ -194,17 +194,17 @@ public class BTreeScanTest extends SimpleDbTestBase {
         
         scan = new BTreeScan(tid, f.getId(), "table", ipred);
         scan.open();
-        for (int i = 0; i < tuplesFiltered.size(); ++i) {
+        for (ArrayList<Integer> integers : tuplesFiltered) {
             assertTrue(scan.hasNext());
             Tuple t = scan.next();
-            assertEquals(tuplesFiltered.get(i), SystemTestUtil.tupleToList(t));
+            assertEquals(integers, SystemTestUtil.tupleToList(t));
         }
 
         scan.rewind();
-        for (int i = 0; i < tuplesFiltered.size(); ++i) {
+        for (ArrayList<Integer> integers : tuplesFiltered) {
             assertTrue(scan.hasNext());
             Tuple t = scan.next();
-            assertEquals(tuplesFiltered.get(i), SystemTestUtil.tupleToList(t));
+            assertEquals(integers, SystemTestUtil.tupleToList(t));
         }
         scan.close();
         Database.getBufferPool().transactionComplete(tid);
@@ -216,10 +216,10 @@ public class BTreeScanTest extends SimpleDbTestBase {
     	// Create the table
         final int LEAF_PAGES = 30;
     	
-    	ArrayList<ArrayList<Integer>> tuples = new ArrayList<ArrayList<Integer>>();
+    	ArrayList<ArrayList<Integer>> tuples = new ArrayList<>();
         int keyField = 0;
         BTreeFile f = BTreeUtility.createBTreeFile(2, LEAF_PAGES*502, null, tuples, keyField);
-        Collections.sort(tuples, new TupleComparator(keyField));
+        tuples.sort(new TupleComparator(keyField));
         TupleDesc td = Utility.getTupleDesc(2);
         InstrumentedBTreeFile table = new InstrumentedBTreeFile(f.getFile(), keyField, td);
         Database.getCatalog().addTable(table, SystemTestUtil.getUUID());

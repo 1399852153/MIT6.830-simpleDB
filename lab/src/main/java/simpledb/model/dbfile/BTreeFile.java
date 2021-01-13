@@ -118,8 +118,8 @@ public class BTreeFile implements DbFile {
 
 				byte pageBuf[] = new byte[BufferPool.getPageSize()];
 				// 根据缓冲区页大小 * 页号 计算偏移
-				if (bis.skip(BTreeRootPtrPage.getPageSize() + (id.pageNumber()-1) * BufferPool.getPageSize()) != 
-						BTreeRootPtrPage.getPageSize() + (id.pageNumber()-1) * BufferPool.getPageSize()) {
+				if (bis.skip(BTreeRootPtrPage.getPageSize() + (long) (id.pageNumber() - 1) * BufferPool.getPageSize()) !=
+						BTreeRootPtrPage.getPageSize() + (long) (id.pageNumber() - 1) * BufferPool.getPageSize()) {
 					throw new IllegalArgumentException(
 							"Unable to seek to correct place in BTreeFile");
 				}
@@ -1599,10 +1599,8 @@ class BTreeSearchIterator extends AbstractDbFileIterator {
 	 * @return the next tuple matching the predicate, or null if none exists
 	 */
 	@Override
-	protected Tuple readNext() throws TransactionAbortedException, DbException,
-	NoSuchElementException {
+	protected Tuple readNext() throws TransactionAbortedException, DbException, NoSuchElementException {
 		while (it != null) {
-
 			while (it.hasNext()) {
 				Tuple t = it.next();
 				if (t.getField(f.keyField()).compare(ipred.getOp(), ipred.getField())) {

@@ -18,9 +18,9 @@ public class BTreeScan implements DbIterator {
 	private static final long serialVersionUID = 1L;
 
 	private boolean isOpen = false;
-	private TransactionId tid;
+	private final TransactionId tid;
 	private TupleDesc myTd;
-	private IndexPredicate ipred = null;
+	private final IndexPredicate ipred;
 	private transient DbFileIterator it;
 	private String tablename;
 	private String alias;

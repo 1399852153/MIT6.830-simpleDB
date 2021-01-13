@@ -2,6 +2,7 @@ package simpledb.model;
 
 import simpledb.enums.Predicate;
 import simpledb.model.field.Field;
+import simpledb.model.iterator.db.IndexDbIterator;
 
 import java.io.Serializable;
 

@@ -444,23 +444,26 @@ public class BTreeInternalPage extends BTreePage {
 	 * @param e The entry to add.
 	 */
 	public void insertEntry(BTreeEntry e) throws DbException {
-		if (!e.getKey().getType().equals(td.getFieldType(keyField)))
+		if (!e.getKey().getType().equals(td.getFieldType(keyField))) {
 			throw new DbException("key field type mismatch, in insertEntry");
-
-		if(e.getLeftChild().getTableId() != pid.getTableId() || e.getRightChild().getTableId() != pid.getTableId())
+		}
+		if(e.getLeftChild().getTableId() != pid.getTableId() || e.getRightChild().getTableId() != pid.getTableId()) {
 			throw new DbException("table id mismatch in insertEntry");
+		}
 
 		if(childCategory == 0) {
-			if(e.getLeftChild().pgcateg() != e.getRightChild().pgcateg())
+			if(e.getLeftChild().pgcateg() != e.getRightChild().pgcateg()) {
 				throw new DbException("child page category mismatch in insertEntry");
-
+			}
 			childCategory = e.getLeftChild().pgcateg();
 		}
-		else if(e.getLeftChild().pgcateg() != childCategory || e.getRightChild().pgcateg() != childCategory)
+		else if(e.getLeftChild().pgcateg() != childCategory || e.getRightChild().pgcateg() != childCategory) {
 			throw new DbException("child page category mismatch in insertEntry");
+		}
 
 		// if this is the first entry, add it and return
 		if(getNumEmptySlots() == getMaxEntries()) {
+			// 整个页的第一条entry插入
 			children[0] = e.getLeftChild().pageNumber();
 			children[1] = e.getRightChild().pageNumber();
 			keys[1] = e.getKey();
@@ -479,8 +482,9 @@ public class BTreeInternalPage extends BTreePage {
 			}
 		}
 
-		if (emptySlot == -1)
-			throw new DbException("called insertEntry on page with no empty slots.");        
+		if (emptySlot == -1) {
+			throw new DbException("called insertEntry on page with no empty slots.");
+		}
 
 		// find the child pointer matching the left or right child in this entry
 		int lessOrEqKey = -1;
@@ -686,8 +690,9 @@ class BTreeInternalPageIterator implements Iterator<BTreeEntry> {
 	}
 
 	public boolean hasNext() {
-		if (nextToReturn != null)
+		if (nextToReturn != null) {
 			return true;
+		}
 
 		try {
 			if(prevChildId == null) {

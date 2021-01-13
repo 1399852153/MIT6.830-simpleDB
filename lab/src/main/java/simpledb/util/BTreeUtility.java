@@ -393,12 +393,12 @@ public class BTreeUtility {
 		if (tuples != null) {
 			tuples.clear();
 		} else {
-			tuples = new ArrayList<ArrayList<Integer>>(rows);
+			tuples = new ArrayList<>(rows);
 		}
 
 		// Fill the tuples list with generated values
 		for (int i = 0; i < rows; ++i) {
-			ArrayList<Integer> tuple = new ArrayList<Integer>(columns);
+			ArrayList<Integer> tuple = new ArrayList<>(columns);
 			for (int j = 0; j < columns; ++j) {
 				// Generate values, or use the column specification
 				Integer columnValue = null;
