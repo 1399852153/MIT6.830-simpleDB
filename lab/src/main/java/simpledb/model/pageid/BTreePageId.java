@@ -109,4 +109,12 @@ public class BTreePageId implements PageId {
 		return data;
 	}
 
+	@Override
+	public String toString() {
+		return "BTreePageId{" +
+				"tableId=" + tableId +
+				", pgNo=" + pgNo +
+				", pgcateg=" + pgcateg +
+				'}';
+	}
 }

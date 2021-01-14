@@ -557,7 +557,7 @@ public class BTreeFile implements DbFile {
 	private BTreeInternalPage getParentWithEmptySlots(TransactionId tid, HashMap<PageId, Page> dirtypages, 
 			BTreePageId parentId, Field field) throws DbException, IOException, TransactionAbortedException {
 		
-		BTreeInternalPage parent = null;
+		BTreeInternalPage parent;
 		
 		// create a parent node if necessary
 		// this will be the new root of the tree

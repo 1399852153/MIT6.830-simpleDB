@@ -90,6 +90,14 @@ public class BTreeScanTest extends SimpleDbTestBase {
         validateScan(columnSizes, rowSizes);
     }
 
+    @Test
+    public void testSmall2() throws IOException, DbException, TransactionAbortedException {
+        int[] columnSizes = new int[]{5};
+        int[] rowSizes =
+                new int[]{15000};
+        validateScan(columnSizes, rowSizes);
+    }
+
     /** Test that rewinding a BTreeScan iterator works. */
     @Test
     public void testRewind() throws IOException, DbException, TransactionAbortedException {

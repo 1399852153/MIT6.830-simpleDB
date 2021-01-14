@@ -69,7 +69,7 @@ public class BTreeFileInsertTest extends SimpleDbTestBase {
 		leftPage.setParentId(parentId);
 		
 		Field field = new IntField(BTreeUtility.MAX_RAND_VALUE/2);
-		HashMap<PageId, Page> dirtypages = new HashMap<PageId, Page>();
+		HashMap<PageId, Page> dirtypages = new HashMap<>();
 		dirtypages.put(leftPageId, leftPage);
 		dirtypages.put(parentId, parent);
 		BTreeLeafPage page = empty.splitLeafPage(tid, dirtypages, leftPage, field);

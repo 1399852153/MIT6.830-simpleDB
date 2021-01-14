@@ -566,6 +566,15 @@ public class BTreeLeafPage extends BTreePage {
 			throw new NoSuchElementException();
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "BTreeLeafPage{" +
+				"leftSibling=" + leftSibling +
+				", rightSibling=" + rightSibling +
+				", pid=" + pid +
+				'}';
+	}
 }
 
 /**
@@ -664,4 +673,6 @@ class BTreeLeafPageReverseIterator implements Iterator<Tuple> {
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}
+
+
 }
