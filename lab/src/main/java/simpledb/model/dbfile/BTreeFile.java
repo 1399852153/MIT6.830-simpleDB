@@ -685,7 +685,7 @@ public class BTreeFile implements DbFile {
 	 */
 	public ArrayList<Page> insertTuple(TransactionId tid, Tuple t)
 			throws DbException, IOException, TransactionAbortedException {
-		HashMap<PageId, Page> dirtypages = new HashMap<PageId, Page>();
+		HashMap<PageId, Page> dirtypages = new HashMap<>();
 
 		// get a read lock on the root pointer page and use it to locate the root page
 		BTreeRootPtrPage rootPtr = getRootPtrPage(tid, dirtypages);
@@ -707,9 +707,7 @@ public class BTreeFile implements DbFile {
 		// insert the tuple into the leaf page
 		leafPage.insertTuple(t);
 
-		ArrayList<Page> dirtyPagesArr = new ArrayList<Page>();
-		dirtyPagesArr.addAll(dirtypages.values());
-		return dirtyPagesArr;
+		return new ArrayList<>(dirtypages.values());
 	}
 	
 	/**

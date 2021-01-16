@@ -80,8 +80,9 @@ public class BTreeUtility {
 	public static Tuple getBTreeTuple(int n, int width) {
 		Tuple tup = new Tuple(Utility.getTupleDesc(width));
 		tup.setRecordId(new RecordId(new BTreePageId(1, 2, BTreePageId.LEAF), 3));
-		for (int i = 0; i < width; ++i)
+		for (int i = 0; i < width; ++i) {
 			tup.setField(i, new IntField(n));
+		}
 		return tup;
 	}
 

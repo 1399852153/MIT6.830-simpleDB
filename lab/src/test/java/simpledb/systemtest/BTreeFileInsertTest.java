@@ -24,7 +24,8 @@ import java.util.Random;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class BTreeFileInsertTest extends SimpleDbTestBase {
+public class
+BTreeFileInsertTest extends SimpleDbTestBase {
 	private TransactionId tid;
 	
 	/**
@@ -52,7 +53,7 @@ public class BTreeFileInsertTest extends SimpleDbTestBase {
 		Database.reset();
 		BTreeFile empty = BTreeUtility.createEmptyBTreeFile(emptyFile.getAbsolutePath(), 2, 1);
 
-		Tuple tup = null;
+		Tuple tup;
 		// we should be able to add 502 tuples on one page
 		for (int i = 0; i < 502; ++i) {
 			tup = BTreeUtility.getBTreeTuple(i, 2);
@@ -93,7 +94,7 @@ public class BTreeFileInsertTest extends SimpleDbTestBase {
 		Database.reset();
 		BTreeFile empty = BTreeUtility.createEmptyBTreeFile(emptyFile.getAbsolutePath(), 2, 1);
 
-		Tuple tup = null;
+		Tuple tup;
 		// add a bunch of identical tuples
 		for (int i = 0; i < 5; ++i) {
 			for(int j = 0; j < 600; ++j) {

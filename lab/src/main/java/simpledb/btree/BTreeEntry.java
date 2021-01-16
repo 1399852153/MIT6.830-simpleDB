@@ -135,7 +135,11 @@ public class BTreeEntry implements Serializable {
 	 * Prints a representation of this BTreeEntry
 	 */
 	public String toString() {
-		return "[" + leftChild.pageNumber() + "|" + key + "|" + rightChild.pageNumber() + "]";
+		return "[" +
+				(leftChild != null ? String.valueOf(leftChild.pageNumber()) : "null") +
+				"|" + key + "|" +
+				(rightChild != null ? String.valueOf(rightChild.pageNumber()) : "null") +
+				"]";
 	}
 	
 }
