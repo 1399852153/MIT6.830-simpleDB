@@ -237,16 +237,19 @@ public class BTreeFileEncoder {
 		}
 		// pointerbytes: left sibling pointer, right sibling pointer, parent pointer
 		int leafpointerbytes = 3 * BTreeLeafPage.INDEX_SIZE;
+		// 计算出一个buffer页能存储的最大记录数(向下取整)
 		int nrecords = (npagebytes * 8 - leafpointerbytes * 8) /  (nrecbytes * 8 + 1);  //floor comes for free
 
 		int nentrybytes = keyType.getLen() + BTreeInternalPage.INDEX_SIZE;
 		// pointerbytes: one extra child pointer, parent pointer, child page category
-		int internalpointerbytes = 2 * BTreeLeafPage.INDEX_SIZE + 1; 
+		int internalpointerbytes = 2 * BTreeLeafPage.INDEX_SIZE + 1;
+		// 计算出一个buffer页能存储的最大entry数(向下取整)
 		int nentries = (npagebytes * 8 - internalpointerbytes * 8 - 1) /  (nentrybytes * 8 + 1);  //floor comes for free
 
 		ArrayList<ArrayList<BTreeEntry>> entries = new ArrayList<>();
 
 		// first add some bytes for the root pointer page
+		// 首先写入一个根节点指针页
 		bf.writePage(new BTreeRootPtrPage(BTreeRootPtrPage.getId(tableid),
 				BTreeRootPtrPage.createEmptyPageData()));
 

@@ -1509,25 +1509,34 @@ class BTreeFileIterator extends AbstractDbFileIterator {
 	 */
 	@Override
 	protected Tuple readNext() throws TransactionAbortedException, DbException {
-		if (it != null && !it.hasNext())
+		if (it != null && !it.hasNext()) {
+			// 当前迭代的页，it已经没有元素了
 			it = null;
+		}
 
 		while (it == null && curp != null) {
+			// 尝试跳转到右兄弟页进行迭代
 			BTreePageId nextp = curp.getRightSiblingId();
 			if(nextp == null) {
+				// 有兄弟页不存在，curp设置为null
 				curp = null;
 			}
 			else {
+				// 有兄弟存在，将其读取出来
 				curp = (BTreeLeafPage) Database.getBufferPool().getPage(tid,
 						nextp, Permissions.READ_ONLY);
+				// it设置为右兄弟页的迭代器
 				it = curp.iterator();
-				if (!it.hasNext())
+				if (!it.hasNext()) {
+					// 右兄弟中无数据，再次跳转到循环开始处寻找下一个右兄弟页面
 					it = null;
+				}
 			}
 		}
-
-		if (it == null)
+		if (it == null) {
+			// 依然没有找到可以迭代的数据了，it设置为null
 			return null;
+		}
 		return it.next();
 	}
 
