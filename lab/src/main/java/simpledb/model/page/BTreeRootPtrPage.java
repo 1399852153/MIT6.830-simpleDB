@@ -85,8 +85,7 @@ public class BTreeRootPtrPage implements Page {
 	 * @return A byte array corresponding to the bytes of this root pointer page.
 	 */
 	public byte[] getPageData(){
-		int len = PAGE_SIZE;
-		ByteArrayOutputStream baos = new ByteArrayOutputStream(len);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(PAGE_SIZE);
 		DataOutputStream dos = new DataOutputStream(baos);
 
 		// write out the root pointer (page number of the root page)
@@ -129,8 +128,7 @@ public class BTreeRootPtrPage implements Page {
 	 * @return The returned ByteArray.
 	 */
 	public static byte[] createEmptyPageData() {
-		int len = PAGE_SIZE;
-		return new byte[len]; //all 0
+		return new byte[PAGE_SIZE]; //all 0
 	}
 
 	public void markDirty(boolean dirty, TransactionId tid){
