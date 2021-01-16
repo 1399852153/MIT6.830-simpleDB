@@ -101,6 +101,7 @@ public class BTreeFileInsertTest extends SimpleDbTestBase {
 		emptyFile.deleteOnExit();
 		Database.reset();
 		int entriesPerPage = BTreeUtility.getNumEntriesPerPage();
+		// 创建一个3 + entriesPerPage页数的表文件
 		BTreeFile empty = BTreeUtility.createEmptyBTreeFile(emptyFile.getAbsolutePath(), 2, 0, 3 + entriesPerPage);
 		int tableid = empty.getId();
 		int keyField = 0;
@@ -119,7 +120,7 @@ public class BTreeFileInsertTest extends SimpleDbTestBase {
 		leftPage.setParentId(parentId);
 		
 		Field field = new IntField(BTreeUtility.MAX_RAND_VALUE/2);
-		HashMap<PageId, Page> dirtypages = new HashMap<PageId, Page>();
+		HashMap<PageId, Page> dirtypages = new HashMap<>();
 		dirtypages.put(leftPageId, leftPage);
 		dirtypages.put(parentId, parent);
 		BTreeInternalPage page = empty.splitInternalPage(tid, dirtypages, leftPage, field);
@@ -155,7 +156,7 @@ public class BTreeFileInsertTest extends SimpleDbTestBase {
 		int keyField = 0;
 
 		// create the leaf page
-		HashMap<PageId, Page> dirtypages = new HashMap<PageId, Page>();
+		HashMap<PageId, Page> dirtypages = new HashMap<>();
 		empty.setEmptyPage(tid, dirtypages, 2);
 		BTreePageId leftPageId = new BTreePageId(tableid, 3, BTreePageId.LEAF);
 		BTreeLeafPage leftPage = BTreeUtility.createRandomLeafPage(leftPageId, 2, keyField,

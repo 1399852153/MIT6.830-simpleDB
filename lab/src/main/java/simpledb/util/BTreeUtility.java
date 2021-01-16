@@ -268,11 +268,11 @@ public class BTreeUtility {
 	 * @return the list of entries
 	 */
 	public static ArrayList<BTreeEntry> generateRandomEntries(int numKeys, int tableid, int childPageCategory, int minKey, int maxKey, int minChildPtr) {
-		ArrayList<Integer> keys = new ArrayList<Integer>(numKeys);
-		ArrayList<Integer> childPointers = new ArrayList<Integer>(numKeys+1);
+		ArrayList<Integer> keys = new ArrayList<>(numKeys);
+		ArrayList<Integer> childPointers = new ArrayList<>(numKeys + 1);
 		generateRandomEntries(numKeys, minKey, maxKey, minChildPtr, childPointers, keys);
 		Collections.sort(keys);
-		ArrayList<BTreeEntry> entryList = new ArrayList<BTreeEntry>();
+		ArrayList<BTreeEntry> entryList = new ArrayList<>();
 		for(int i = 0; i < numKeys; ++i) {
 			entryList.add(new BTreeEntry(new IntField(keys.get(i)),
 					new BTreePageId(tableid, childPointers.get(i), childPageCategory),

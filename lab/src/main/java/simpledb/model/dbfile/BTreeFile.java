@@ -453,7 +453,7 @@ public class BTreeFile implements DbFile {
         BTreeEntry[] entryToMove = new BTreeEntry[(page.getNumEntries()+1) / 2];
         int moveCnt = entryToMove.length - 1;
         BTreeEntry midKey = null;
-
+        // 拆分时有一半的entry需要移动到新的页中
         while (moveCnt >= 0 && it.hasNext()) {
             entryToMove[moveCnt--] = it.next();
         }
@@ -469,8 +469,9 @@ public class BTreeFile implements DbFile {
             }
             updateParentPointer(tid, dirtypages, newInternalPg.getId(), entryToMove[i].getRightChild());
         }
-        // update child
-        midKey.setLeftChild(page.getId());
+		assert midKey != null;
+		// update child
+		midKey.setLeftChild(page.getId());
         midKey.setRightChild(newInternalPg.getId());
 
         BTreeInternalPage parent = getParentWithEmptySlots(tid, dirtypages, page.getParentId(), midKey.getKey());
@@ -597,10 +598,11 @@ public class BTreeFile implements DbFile {
 	 */
 	private void updateParentPointer(TransactionId tid, HashMap<PageId, Page> dirtypages, BTreePageId pid, BTreePageId child)
 			throws DbException, IOException, TransactionAbortedException {
-
+        // 先以只读的权限，查询出child对应的页
 		BTreePage p = (BTreePage) getPage(tid, dirtypages, child, Permissions.READ_ONLY);
 
 		if(!p.getParentId().equals(pid)) {
+			// 如果child对应的页和参数pid不一致，将其parentId设置为pid
 			p = (BTreePage) getPage(tid, dirtypages, child, Permissions.READ_WRITE);
 			p.setParentId(pid);
 		}
