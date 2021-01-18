@@ -1213,6 +1213,7 @@ public class BTreeFile implements DbFile {
 		BTreePageId pageId = new BTreePageId(tableid, t.getRecordId().getPageId().pageNumber(), 
 				BTreePageId.LEAF);
 		BTreeLeafPage page = (BTreeLeafPage) getPage(tid, dirtypages, pageId, Permissions.READ_WRITE);
+		// 在内存中删除对应的tuple
 		page.deleteTuple(t);
 
 		// if the page is below minimum occupancy, get some tuples from its siblings
@@ -1220,15 +1221,15 @@ public class BTreeFile implements DbFile {
 		int maxEmptySlots = page.getMaxTuples() - page.getMaxTuples()/2; // ceiling
 		if(page.getNumEmptySlots() > maxEmptySlots) {
 			try {
+				// 当被删除数据的页中数据小于阈值时（小于最大容纳数据量的一半）
+				// 需要视情况合并相邻的兄弟页节点，或是从负载较高的兄弟页中挪动一部分到当前负载不足的页（总之就是保证空间、时间效率的平衡）
 				handleMinOccupancyPage(tid, dirtypages, page);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
 
-		ArrayList<Page> dirtyPagesArr = new ArrayList<Page>();
-		dirtyPagesArr.addAll(dirtypages.values());
-		return dirtyPagesArr;
+		return new ArrayList<>(dirtypages.values());
 	}
 
 	/**

@@ -144,11 +144,11 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		BTreePageId rootPtrId = BTreeRootPtrPage.getId(twoLeafPageFile.getId());
 		BTreeRootPtrPage rootPtr = (BTreeRootPtrPage) Database.getBufferPool().getPage(
 				tid, rootPtrId, Permissions.READ_ONLY);
-		assertTrue(rootPtr.getRootId().pgcateg() == BTreePageId.LEAF);
+		assertEquals(rootPtr.getRootId().pgcateg(), BTreePageId.LEAF);
 		BTreeLeafPage root = (BTreeLeafPage) Database.getBufferPool().getPage(
 				tid, rootPtr.getRootId(), Permissions.READ_ONLY);
 		assertEquals(1, root.getNumEmptySlots());
-		assertTrue(root.getParentId().equals(rootPtrId));
+		assertEquals(root.getParentId(), rootPtrId);
 	}
 
 	@Test
@@ -336,11 +336,11 @@ public class BTreeFileDeleteTest extends SimpleDbTestBase {
 		BTreePageId rootPtrId = BTreeRootPtrPage.getId(bigFile.getId());
 		rootPtr = (BTreeRootPtrPage) Database.getBufferPool().getPage(
 				tid, rootPtrId, Permissions.READ_ONLY);
-		assertTrue(rootPtr.getRootId().pgcateg() == BTreePageId.INTERNAL);
+		assertEquals(rootPtr.getRootId().pgcateg(), BTreePageId.INTERNAL);
 		root = (BTreeInternalPage) Database.getBufferPool().getPage(
 				tid, rootPtr.getRootId(), Permissions.READ_ONLY);
 		assertEquals(0, root.getNumEmptySlots());
-		assertTrue(root.getParentId().equals(rootPtrId));
+		assertEquals(root.getParentId(), rootPtrId);
 
 		it.close();
 	}    
