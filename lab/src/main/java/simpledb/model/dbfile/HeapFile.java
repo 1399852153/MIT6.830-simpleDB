@@ -9,6 +9,7 @@ import simpledb.model.page.Page;
 import simpledb.model.pageid.HeapPageId;
 import simpledb.model.pageid.PageId;
 
+import javax.xml.crypto.Data;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,7 +21,7 @@ import java.util.NoSuchElementException;
  * size, and the file is simply a collection of those pages. HeapFile works
  * closely with HeapPage. The format of HeapPages is described in the HeapPage
  * constructor.
- * 
+ *
  * @see HeapPage#HeapPage
  * @author Sam Madden
  */
@@ -30,7 +31,7 @@ public class HeapFile implements DbFile {
     private final TupleDesc tupleDesc;
     /**
      * Constructs a heap file backed by the specified file.
-     * 
+     *
      * @param f
      *            the file that stores the on-disk backing store for this heap
      *            file.
@@ -43,7 +44,7 @@ public class HeapFile implements DbFile {
 
     /**
      * Returns the File backing this HeapFile on disk.
-     * 
+     *
      * @return the File backing this HeapFile on disk.
      */
     public File getFile() {
@@ -57,10 +58,9 @@ public class HeapFile implements DbFile {
      * HeapFile has a "unique id," and that you always return the same value for
      * a particular HeapFile. We suggest hashing the absolute file name of the
      * file underlying the heapfile, i.e. f.getAbsoluteFile().hashCode().
-     * 
+     *
      * @return an ID uniquely identifying this HeapFile.
      */
-    @Override
     public int getId() {
         // some code goes here
         // generate unique tableid
@@ -69,7 +69,7 @@ public class HeapFile implements DbFile {
 
     /**
      * Returns the TupleDesc of the table stored in this DbFile.
-     * 
+     *
      * @return TupleDesc of this DbFile.
      */
     @Override
@@ -140,7 +140,7 @@ public class HeapFile implements DbFile {
         ArrayList<Page> affected = new ArrayList<>(1);
         int numPages = numPages();
 
-        for (int pgNo = 0; pgNo < numPages + 1; pgNo++) {
+        for (int pgNo = 0; pgNo <= numPages; pgNo++) {
             HeapPageId pid = new HeapPageId(getId(), pgNo);
             HeapPage pg;
             if (pgNo < numPages) {
@@ -155,10 +155,12 @@ public class HeapFile implements DbFile {
 
             // 依然存在空插槽
             if (pg.getNumEmptySlots() > 0) {
+                // insert will update tuple when inserted
                 pg.insertTuple(t);
-
+                // writePage(pg);
                 if (pgNo < numPages) {
                     // 被影响的页
+                    pg.markDirty(true, tid);
                     affected.add(pg);
                 } else {
                     // should append the dbfile
@@ -185,9 +187,11 @@ public class HeapFile implements DbFile {
         RecordId rid = t.getRecordId();
         HeapPageId pid = (HeapPageId) rid.getPageId();
         if (pid.getTableId() == getId()) {
+            // int pgNo = pid.pageNumber();
             HeapPage pg = (HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
             pg.deleteTuple(t);
             // writePage(pg);
+            pg.markDirty(true, tid);
             affected.add(pg);
             return affected;
         }
