@@ -132,7 +132,7 @@ class LockManager {
             }
         } else {
             // no entry tid
-            ArrayList<PageId> lockList = new ArrayList<PageId>();
+            ArrayList<PageId> lockList = new ArrayList<>();
             lockList.add(pid);
             transactionTable.put(tid, lockList);
         }
@@ -306,9 +306,9 @@ public class BufferPool {
         } else {
             lockType = LockManager.LockType.XLock;
         }
-        Debug.log(pid.toString() + ": before acquire lock\n");
+        Debug.log(Thread.currentThread().getName() + " " + pid.toString() + ": before acquire lock\n");
         lockMgr.acquireLock(tid, pid, lockType, DEFAUT_MAXTIMEOUT);
-        Debug.log(pid.toString() + ": acquired the lock\n");
+        Debug.log(Thread.currentThread().getName() + " " + pid.toString() + ": acquired the lock\n");
 
         Page pg;
         if (pgBufferPool.containsKey(pid)) {

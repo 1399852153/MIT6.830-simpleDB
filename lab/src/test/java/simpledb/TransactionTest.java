@@ -92,7 +92,7 @@ public class TransactionTest extends TestUtil.CreateHeapFile {
 
     boolean found = false;
     while (it.hasNext()) {
-      Tuple tup = (Tuple) it.next();
+      Tuple tup = it.next();
       IntField f0 = (IntField) tup.getField(0);
       IntField f1 = (IntField) tup.getField(1);
 

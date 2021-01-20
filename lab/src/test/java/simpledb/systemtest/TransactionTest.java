@@ -34,7 +34,7 @@ public class TransactionTest extends SimpleDbTestBase {
     private void validateTransactions(int threads)
             throws DbException, TransactionAbortedException, IOException {
         // Create a table with a single integer value = 0
-        HashMap<Integer, Integer> columnSpecification = new HashMap<Integer, Integer>();
+        HashMap<Integer, Integer> columnSpecification = new HashMap<>();
         columnSpecification.put(0, 0);
         DbFile table = SystemTestUtil.createRandomHeapFile(1, 1, columnSpecification, null);
 
@@ -130,7 +130,7 @@ public class TransactionTest extends SimpleDbTestBase {
                         q2.close();
 
                         // set up a Set with a tuple that is one higher than the old one.
-                        HashSet<Tuple> hs = new HashSet<Tuple>();
+                        HashSet<Tuple> hs = new HashSet<>();
                         hs.add(t);
                         TupleIterator ti = new TupleIterator(t.getTupleDesc(), hs);
 
@@ -158,9 +158,7 @@ public class TransactionTest extends SimpleDbTestBase {
             
             try {
                 latch.notParticipating();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } catch (BrokenBarrierException e) {
+            } catch (InterruptedException | BrokenBarrierException e) {
                 throw new RuntimeException(e);
             }
             completed = true;
