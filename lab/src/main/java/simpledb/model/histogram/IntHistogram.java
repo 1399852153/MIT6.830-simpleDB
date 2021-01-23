@@ -1,4 +1,4 @@
-package simpledb.model;
+package simpledb.model.histogram;
 
 import simpledb.enums.Predicate;
 

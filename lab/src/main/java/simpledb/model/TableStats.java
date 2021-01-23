@@ -8,6 +8,8 @@ import simpledb.model.dbfile.HeapFile;
 import simpledb.model.field.Field;
 import simpledb.model.field.IntField;
 import simpledb.model.field.StringField;
+import simpledb.model.histogram.IntHistogram;
+import simpledb.model.histogram.StringHistogram;
 import simpledb.model.iterator.db.SeqScan;
 
 import java.util.HashMap;
