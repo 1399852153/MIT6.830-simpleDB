@@ -2,6 +2,8 @@ package simpledb.model.histogram;
 
 import simpledb.enums.Predicate;
 
+import java.util.Arrays;
+
 /** A class to represent a fixed-width histogram over a single integer-based field.
  */
 public class IntHistogram {
@@ -135,6 +137,6 @@ public class IntHistogram {
      */
     public String toString() {
         // some code goes here
-        return buckets.toString();
+        return Arrays.toString(buckets);
     }
 }

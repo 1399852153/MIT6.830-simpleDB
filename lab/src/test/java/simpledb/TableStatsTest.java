@@ -27,7 +27,7 @@ public class TableStatsTest extends SimpleDbTestBase {
 	
 	@Before public void setUp() throws Exception {
 		super.setUp();
-		this.tuples = new ArrayList<ArrayList<Integer>>();
+		this.tuples = new ArrayList<>();
 		this.f = SystemTestUtil.createRandomHeapFile(10, 1020, 32, null, tuples);
 		
 		this.tableName = SystemTestUtil.getUUID();
@@ -63,7 +63,7 @@ public class TableStatsTest extends SimpleDbTestBase {
 			ioCosts[i] = 1;
 			pageNums[i] = 3*(i+1);
 		}
-		double stats[] = getRandomTableScanCosts(pageNums, ioCosts);
+		double[] stats = getRandomTableScanCosts(pageNums, ioCosts);
 		ret = SystemTestUtil.checkConstant(stats);
 		Assert.assertEquals(ret[0], Boolean.FALSE);
 		ret = SystemTestUtil.checkLinear(stats);

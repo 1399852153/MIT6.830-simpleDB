@@ -185,9 +185,10 @@ public class SystemTestUtil {
 	}
 	
 	private static double[] getDiff(double[] sequence) {
-		double ret[] = new double[sequence.length - 1];
-		for (int i = 0; i < sequence.length - 1; ++i)
-			ret[i] = sequence[i + 1] - sequence[i];
+        double[] ret = new double[sequence.length - 1];
+		for (int i = 0; i < sequence.length - 1; ++i) {
+            ret[i] = sequence[i + 1] - sequence[i];
+        }
 		return ret;
 	}
 	/**
@@ -225,13 +226,15 @@ public class SystemTestUtil {
 		Object[] ret = new Object[2];
 		//compute average
 		double sum = .0;
-		for(int i = 0; i < sequence.length; ++i)
-			sum += sequence[i];
+        for (double v : sequence) {
+            sum += v;
+        }
 		double av = sum/(sequence.length + .0);
 		//compute standard deviation
 		double sqsum = 0;
-		for(int i = 0; i < sequence.length; ++i)
-			sqsum += (sequence[i] - av)*(sequence[i] - av);
+        for (double v : sequence) {
+            sqsum += (v - av) * (v - av);
+        }
 		double std = Math.sqrt(sqsum/(sequence.length + .0));
 		ret[0] = std < 1.0 ? Boolean.TRUE : Boolean.FALSE;
 		ret[1] = av;

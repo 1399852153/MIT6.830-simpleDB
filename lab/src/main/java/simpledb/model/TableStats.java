@@ -156,9 +156,7 @@ public class TableStats {
                 }
             }
             scan.close();
-        } catch (DbException e) {
-            e.printStackTrace();
-        } catch (TransactionAbortedException e) {
+        } catch (DbException | TransactionAbortedException e) {
             e.printStackTrace();
         }
     }
