@@ -19,8 +19,8 @@ import java.util.*;
  * logical plan.
  */
 public class JoinOptimizer {
-    LogicalPlan p;
-    Vector<LogicalJoinNode> joins;
+    private LogicalPlan p;
+    private Vector<LogicalJoinNode> joins;
 
     /**
      * Constructor
@@ -53,7 +53,7 @@ public class JoinOptimizer {
     public static DbIterator instantiateJoin(LogicalJoinNode lj,
             DbIterator plan1, DbIterator plan2) throws ParsingException {
 
-        int t1id = 0, t2id = 0;
+        int t1id, t2id;
         DbIterator j;
 
         try {

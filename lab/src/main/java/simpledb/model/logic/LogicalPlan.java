@@ -51,13 +51,13 @@ public class LogicalPlan {
 
     /** Constructor -- generate an empty logical plan */
     public LogicalPlan() {
-        joins = new Vector<LogicalJoinNode>();
-        filters = new Vector<LogicalFilterNode>();
-        tables = new Vector<LogicalScanNode>();
-        subplanMap = new HashMap<String, DbIterator>();
-        tableMap = new HashMap<String,Integer>();
+        joins = new Vector<>();
+        filters = new Vector<>();
+        tables = new Vector<>();
+        subplanMap = new HashMap<>();
+        tableMap = new HashMap<>();
 
-        selectList = new Vector<LogicalSelectListNode>();
+        selectList = new Vector<>();
         this.query = "";
     }
 
@@ -297,13 +297,13 @@ public class LogicalPlan {
      */ 
     public DbIterator physicalPlan(TransactionId t, Map<String,TableStats> baseTableStats, boolean explain) throws ParsingException {
         Iterator<LogicalScanNode> tableIt = tables.iterator();
-        HashMap<String,String> equivMap = new HashMap<String,String>();
-        HashMap<String,Double> filterSelectivities = new HashMap<String, Double>();
-        HashMap<String,TableStats> statsMap = new HashMap<String,TableStats>();
+        HashMap<String,String> equivMap = new HashMap<>();
+        HashMap<String,Double> filterSelectivities = new HashMap<>();
+        HashMap<String,TableStats> statsMap = new HashMap<>();
 
         while (tableIt.hasNext()) {
             LogicalScanNode table = tableIt.next();
-            SeqScan ss = null;
+            SeqScan ss;
             try {
                  ss = new SeqScan(t, Database.getCatalog().getDatabaseFile(table.t).getId(), table.alias);
             } catch (NoSuchElementException e) {
@@ -335,7 +335,7 @@ public class LogicalPlan {
                 throw new ParsingException("Unknown field in filter expression " + lf.fieldQuantifiedName);
             }
             if (ftyp == Type.INT_TYPE)
-                f = new IntField(new Integer(lf.c).intValue());
+                f = new IntField(new Integer(lf.c));
             else
                 f = new StringField(lf.c, Type.STRING_LEN);
 
@@ -393,7 +393,7 @@ public class LogicalPlan {
                 throw new ParsingException("Unknown table in WHERE clause " + lj.t2Alias);
             
             DbIterator j;
-            j = jo.instantiateJoin(lj,plan1,plan2);
+            j = JoinOptimizer.instantiateJoin(lj,plan1,plan2);
             subplanMap.put(t1name, j);
 
             if (!isSubqueryJoin) {
@@ -417,11 +417,11 @@ public class LogicalPlan {
             throw new ParsingException("Query does not include join expressions joining all nodes!");
         }
         
-        DbIterator node =  (DbIterator)(subplanMap.entrySet().iterator().next().getValue());
+        DbIterator node = subplanMap.entrySet().iterator().next().getValue();
 
         //walk the select list, to determine order in which to project output fields
-        ArrayList<Integer> outFields = new ArrayList<Integer>();
-        ArrayList<Type> outTypes = new ArrayList<Type>();
+        ArrayList<Integer> outFields = new ArrayList<>();
+        ArrayList<Type> outTypes = new ArrayList<>();
         for (int i = 0; i < selectList.size(); i++) {
             LogicalSelectListNode si = selectList.elementAt(i);
             if (si.aggOp != null) {

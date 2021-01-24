@@ -70,7 +70,7 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
     public void setUp() throws Exception {
         super.setUp();
         // Create some sample tables to work with
-        this.tuples1 = new ArrayList<ArrayList<Integer>>();
+        this.tuples1 = new ArrayList<>();
         this.f1 = SystemTestUtil.createRandomHeapFile(10, 1000, 20, null,
                 tuples1, "c");
 
@@ -82,7 +82,7 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
         stats1 = new TableStats(tableId1, 19);
         TableStats.setTableStats(tableName1, stats1);
 
-        this.tuples2 = new ArrayList<ArrayList<Integer>>();
+        this.tuples2 = new ArrayList<>();
         this.f2 = SystemTestUtil.createRandomHeapFile(10, 10000, 20, null,
                 tuples2, "c");
 
@@ -100,8 +100,7 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
                                         int[] card1s, int[] card2s, double[] cost1s, double[] cost2s) {
         double[] ret = new double[card1s.length];
         for (int i = 0; i < card1s.length; ++i) {
-            ret[i] = jo.estimateJoinCost(js, card1s[i], card2s[i], cost1s[i],
-                    cost2s[i]);
+            ret[i] = jo.estimateJoinCost(js, card1s[i], card2s[i], cost1s[i], cost2s[i]);
             // assert that he join cost is no less than the total cost of
             // scanning two tables
             Assert.assertTrue(ret[i] > cost1s[i] + cost2s[i]);
@@ -125,7 +124,7 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
         Parser p = new Parser();
         jo = new JoinOptimizer(p.generateLogicalPlan(tid, "SELECT * FROM "
                 + tableName1 + " t1, " + tableName2
-                + " t2 WHERE t1.c1 = t2.c2;"), new Vector<LogicalJoinNode>());
+                + " t2 WHERE t1.c1 = t2.c2;"), new Vector<>());
         // 1 join 2
         LogicalJoinNode equalsJoinNode = new LogicalJoinNode(tableName1,
                 tableName2, Integer.toString(1), Integer.toString(2),
@@ -156,10 +155,10 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
 
     private void checkJoinEstimateCosts(JoinOptimizer jo,
             LogicalJoinNode equalsJoinNode) {
-        int card1s[] = new int[20];
-        int card2s[] = new int[card1s.length];
-        double cost1s[] = new double[card1s.length];
-        double cost2s[] = new double[card1s.length];
+        int[] card1s = new int[20];
+        int[] card2s = new int[card1s.length];
+        double[] cost1s = new double[card1s.length];
+        double[] cost2s = new double[card1s.length];
         Object[] ret;
         // card1s linear others constant
         for (int i = 0; i < card1s.length; ++i) {
@@ -167,8 +166,7 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
             card2s[i] = 5;
             cost1s[i] = cost2s[i] = 5.0;
         }
-        double stats[] = getRandomJoinCosts(jo, equalsJoinNode, card1s, card2s,
-                cost1s, cost2s);
+        double[] stats = getRandomJoinCosts(jo, equalsJoinNode, card1s, card2s, cost1s, cost2s);
         ret = SystemTestUtil.checkLinear(stats);
         Assert.assertEquals(Boolean.TRUE, ret[0]);
         // card2s linear others constant
@@ -177,8 +175,7 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
             card2s[i] = 3 * i + 1;
             cost1s[i] = cost2s[i] = 5.0;
         }
-        stats = getRandomJoinCosts(jo, equalsJoinNode, card1s, card2s, cost1s,
-                cost2s);
+        stats = getRandomJoinCosts(jo, equalsJoinNode, card1s, card2s, cost1s, cost2s);
         ret = SystemTestUtil.checkLinear(stats);
         Assert.assertEquals(Boolean.TRUE, ret[0]);
         // cost1s linear others constant
@@ -187,8 +184,7 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
             cost1s[i] = 5.0 * (i + 1);
             cost2s[i] = 3.0;
         }
-        stats = getRandomJoinCosts(jo, equalsJoinNode, card1s, card2s, cost1s,
-                cost2s);
+        stats = getRandomJoinCosts(jo, equalsJoinNode, card1s, card2s, cost1s, cost2s);
         ret = SystemTestUtil.checkLinear(stats);
         Assert.assertEquals(Boolean.TRUE, ret[0]);
         // cost2s linear others constant
@@ -197,8 +193,7 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
             cost1s[i] = 5.0;
             cost2s[i] = 3.0 * (i + 1);
         }
-        stats = getRandomJoinCosts(jo, equalsJoinNode, card1s, card2s, cost1s,
-                cost2s);
+        stats = getRandomJoinCosts(jo, equalsJoinNode, card1s, card2s, cost1s, cost2s);
         ret = SystemTestUtil.checkLinear(stats);
         Assert.assertEquals(Boolean.TRUE, ret[0]);
         // everything linear
@@ -208,8 +203,7 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
             cost1s[i] = 5.0 * i + 2;
             cost2s[i] = 3.0 * i + 1;
         }
-        stats = getRandomJoinCosts(jo, equalsJoinNode, card1s, card2s, cost1s,
-                cost2s);
+        stats = getRandomJoinCosts(jo, equalsJoinNode, card1s, card2s, cost1s, cost2s);
         ret = SystemTestUtil.checkQuadratic(stats);
         Assert.assertEquals(Boolean.TRUE, ret[0]);
     }
