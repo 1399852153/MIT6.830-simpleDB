@@ -19,6 +19,7 @@ import simpledb.model.logic.LogicalPlan;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class Parser {
@@ -310,17 +311,8 @@ public class Parser {
                 m = c.getMethod(
                         "printQueryPlanTree", DbIterator.class, System.out.getClass());
                 m.invoke(c.newInstance(), physicalPlan,System.out);
-            } catch (ClassNotFoundException e) {
-            } catch (SecurityException e) {
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            } catch (InstantiationException e) {
+            } catch (ClassNotFoundException | SecurityException ignored) {
+            } catch (NoSuchMethodException | IllegalArgumentException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
                 e.printStackTrace();
             }
         }
@@ -388,12 +380,12 @@ public class Parser {
 
                 i++;
             }
-            ArrayList<Tuple> tups = new ArrayList<Tuple>();
+            ArrayList<Tuple> tups = new ArrayList<>();
             tups.add(t);
             newTups = new TupleArrayIterator(tups);
 
         } else {
-            ZQuery zq = (ZQuery) s.getQuery();
+            ZQuery zq = s.getQuery();
             LogicalPlan lp = parseQueryLogicalPlan(tId, zq);
             newTups = lp.physicalPlan(tId, TableStats.getStatsMap(), explain);
         }
@@ -570,24 +562,17 @@ public class Parser {
                 }
             }
 
-        } catch (TransactionAbortedException e) {
-            e.printStackTrace();
-        } catch (DbException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (TransactionAbortedException | DbException | IOException e) {
             e.printStackTrace();
         } catch (ParsingException e) {
-            System.out
-                    .println("Invalid SQL expression: \n \t" + e.getMessage());
-        } catch (Zql.ParseException e) {
-            System.out.println("Invalid SQL expression: \n \t " + e);
-        } catch (Zql.TokenMgrError e) {
+            System.out.println("Invalid SQL expression: \n \t" + e.getMessage());
+        } catch (ParseException | TokenMgrError e) {
             System.out.println("Invalid SQL expression: \n \t " + e);
         }
     }
 
     // Basic SQL completions
-    public static final String[] SQL_COMMANDS = { "select", "from", "where",
+    private static final String[] SQL_COMMANDS = { "select", "from", "where",
             "group by", "max(", "min(", "avg(", "count", "rollback", "commit",
             "insert", "delete", "values", "into" };
 
@@ -603,13 +588,13 @@ public class Parser {
         p.start(argv);
     }
 
-    static final String usage = "Usage: parser catalogFile [-explain] [-f queryFile]";
+    private static final String usage = "Usage: parser catalogFile [-explain] [-f queryFile]";
 
-    protected void shutdown() {
+    private void shutdown() {
         System.out.println("Bye");
     }
 
-    protected boolean interactive = true;
+    private boolean interactive = true;
 
     protected void start(String[] argv) throws IOException {
         // first add tables to database
@@ -675,7 +660,7 @@ public class Parser {
                     buffer.append(line.substring(0, split + 1));
                     String cmd = buffer.toString().trim();
                     cmd = cmd.substring(0, cmd.length() - 1).trim() + ";";
-                    byte[] statementBytes = cmd.getBytes("UTF-8");
+                    byte[] statementBytes = cmd.getBytes(StandardCharsets.UTF_8);
                     if (cmd.equalsIgnoreCase("quit;")
                             || cmd.equalsIgnoreCase("exit;")) {
                         shutdown();
@@ -708,7 +693,7 @@ class TupleArrayIterator implements DbIterator {
 	 * 
 	 */
     private static final long serialVersionUID = 1L;
-    ArrayList<Tuple> tups;
+    private ArrayList<Tuple> tups;
     Iterator<Tuple> it = null;
 
     public TupleArrayIterator(ArrayList<Tuple> tups) {

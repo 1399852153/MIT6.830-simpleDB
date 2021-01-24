@@ -45,19 +45,19 @@ public class QueryTest {
 //		HashMap<String, TableStats> stats = new HashMap<String, TableStats>();
 		
 		// Create all of the tables, and add them to the catalog
-		ArrayList<ArrayList<Integer>> empTuples = new ArrayList<ArrayList<Integer>>();
+		ArrayList<ArrayList<Integer>> empTuples = new ArrayList<>();
 		HeapFile emp = SystemTestUtil.createRandomHeapFile(6, 100000, null, empTuples, "c");	
 		Database.getCatalog().addTable(emp, "emp");
 		
-		ArrayList<ArrayList<Integer>> deptTuples = new ArrayList<ArrayList<Integer>>();
+		ArrayList<ArrayList<Integer>> deptTuples = new ArrayList<>();
 		HeapFile dept = SystemTestUtil.createRandomHeapFile(3, 1000, null, deptTuples, "c");	
 		Database.getCatalog().addTable(dept, "dept");
 		
-		ArrayList<ArrayList<Integer>> hobbyTuples = new ArrayList<ArrayList<Integer>>();
+		ArrayList<ArrayList<Integer>> hobbyTuples = new ArrayList<>();
 		HeapFile hobby = SystemTestUtil.createRandomHeapFile(6, 1000, null, hobbyTuples, "c");
 		Database.getCatalog().addTable(hobby, "hobby");
 		
-		ArrayList<ArrayList<Integer>> hobbiesTuples = new ArrayList<ArrayList<Integer>>();
+		ArrayList<ArrayList<Integer>> hobbiesTuples = new ArrayList<>();
 		HeapFile hobbies = SystemTestUtil.createRandomHeapFile(2, 200000, null, hobbiesTuples, "c");
 		Database.getCatalog().addTable(hobbies, "hobbies");
 		
