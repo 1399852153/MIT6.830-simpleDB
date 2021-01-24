@@ -71,7 +71,7 @@ public class Parser {
                         "Only simple binary expresssions of the form A op B are currently supported.");
             }
 
-            boolean isJoin = false;
+            boolean isJoin;
             Predicate.Op op = getOp(wx.getOperator());
 
             boolean op1const = ops.elementAt(0) instanceof ZConstant; // otherwise
@@ -95,7 +95,7 @@ public class Parser {
 
             if (isJoin) { // join node
 
-                String tab1field = "", tab2field = "";
+                String tab1field = "", tab2field;
 
                 if (!op1const) { // left op is a nested query
                     // generate a virtual table for the left op
@@ -112,10 +112,7 @@ public class Parser {
                         DbIterator pp = sublp.physicalPlan(tid,
                                 TableStats.getStatsMap(), explain);
                         lp.addJoin(tab1field, pp, op);
-                    } catch (IOException e) {
-                        throw new ParsingException("Invalid subquery "
-                                + ops.elementAt(1));
-                    } catch (Zql.ParseException e) {
+                    } catch (IOException | ParseException e) {
                         throw new ParsingException("Invalid subquery "
                                 + ops.elementAt(1));
                     }
@@ -131,10 +128,10 @@ public class Parser {
                 ZConstant op2 = (ZConstant) ops.elementAt(1);
                 if (op1.getType() == ZConstant.COLUMNNAME) {
                     column = op1.getValue();
-                    compValue = new String(op2.getValue());
+                    compValue = op2.getValue();
                 } else {
                     column = op2.getValue();
-                    compValue = new String(op1.getValue());
+                    compValue = op1.getValue();
                 }
 
                 lp.addFilter(column, op, compValue);
@@ -243,8 +240,7 @@ public class Parser {
             } else {
                 if (groupByField != null
                         && !(groupByField.equals(si.getTable() + "."
-                                + si.getColumn()) || groupByField.equals(si
-                                .getColumn()))) {
+                                + si.getColumn()) || groupByField.equals(si.getColumn()))) {
                     throw new ParsingException("Non-aggregate field "
                             + si.getColumn()
                             + " does not appear in GROUP BY list.");

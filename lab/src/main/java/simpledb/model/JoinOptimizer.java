@@ -212,13 +212,13 @@ public class JoinOptimizer {
      */
     @SuppressWarnings("unchecked")
     public <T> Set<Set<T>> enumerateSubsets(Vector<T> v, int size) {
-        Set<Set<T>> els = new HashSet<Set<T>>();
-        els.add(new HashSet<T>());
+        Set<Set<T>> els = new HashSet<>();
+        els.add(new HashSet<>());
         // Iterator<Set> it;
         // long start = System.currentTimeMillis();
 
         for (int i = 0; i < size; i++) {
-            Set<Set<T>> newels = new HashSet<Set<T>>();
+            Set<Set<T>> newels = new HashSet<>();
             for (Set<T> s : els) {
                 for (T t : v) {
                     Set<T> news = (Set<T>) (((HashSet<T>) s).clone());
@@ -267,7 +267,7 @@ public class JoinOptimizer {
             Set<Set<LogicalJoinNode>> setOfSubset = this.enumerateSubsets(this.joins, i);
             for (Set<LogicalJoinNode> s : setOfSubset) {
                 // this.computeCostAndCardOfSubplan(stats, filterSelectivities, toRemove, sub, best, memo);
-                Double bestCostSofar = Double.MAX_VALUE;
+                double bestCostSofar = Double.MAX_VALUE;
                 CostCard bestPlan = new CostCard();
                 for (LogicalJoinNode toRemove : s) {
                     CostCard plan = this.computeCostAndCardOfSubplan(stats, filterSelectivities, toRemove, s, bestCostSofar, memo);
@@ -348,7 +348,7 @@ public class JoinOptimizer {
         boolean leftPkey, rightPkey;
 
         if (news.isEmpty()) { // base case -- both are base relations
-            prevBest = new Vector<LogicalJoinNode>();
+            prevBest = new Vector<>();
             t1cost = stats.get(table1Name).estimateScanCost();
             t1card = stats.get(table1Name).estimateTableCardinality(
                     filterSelectivities.get(j.t1Alias));

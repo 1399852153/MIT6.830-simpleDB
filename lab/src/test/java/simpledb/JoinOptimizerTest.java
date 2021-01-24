@@ -133,21 +133,21 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
         // 2 join 1
         jo = new JoinOptimizer(p.generateLogicalPlan(tid, "SELECT * FROM "
                 + tableName1 + " t1, " + tableName2
-                + " t2 WHERE t1.c1 = t2.c2;"), new Vector<LogicalJoinNode>());
+                + " t2 WHERE t1.c1 = t2.c2;"), new Vector<>());
         equalsJoinNode = new LogicalJoinNode(tableName2, tableName1,
                 Integer.toString(2), Integer.toString(1), Predicate.Op.EQUALS);
         checkJoinEstimateCosts(jo, equalsJoinNode);
         // 1 join 1
         jo = new JoinOptimizer(p.generateLogicalPlan(tid, "SELECT * FROM "
                 + tableName1 + " t1, " + tableName1
-                + " t2 WHERE t1.c3 = t2.c4;"), new Vector<LogicalJoinNode>());
+                + " t2 WHERE t1.c3 = t2.c4;"), new Vector<>());
         equalsJoinNode = new LogicalJoinNode(tableName1, tableName1,
                 Integer.toString(3), Integer.toString(4), Predicate.Op.EQUALS);
         checkJoinEstimateCosts(jo, equalsJoinNode);
         // 2 join 2
         jo = new JoinOptimizer(p.generateLogicalPlan(tid, "SELECT * FROM "
                 + tableName2 + " t1, " + tableName2
-                + " t2 WHERE t1.c8 = t2.c7;"), new Vector<LogicalJoinNode>());
+                + " t2 WHERE t1.c8 = t2.c7;"), new Vector<>());
         equalsJoinNode = new LogicalJoinNode(tableName2, tableName2,
                 Integer.toString(8), Integer.toString(7), Predicate.Op.EQUALS);
         checkJoinEstimateCosts(jo, equalsJoinNode);
@@ -219,7 +219,7 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
         JoinOptimizer j = new JoinOptimizer(p.generateLogicalPlan(tid,
                 "SELECT * FROM " + tableName2 + " t1, " + tableName2
                         + " t2 WHERE t1.c8 = t2.c7;"),
-                new Vector<LogicalJoinNode>());
+                new Vector<>());
 
         double cardinality;
 
@@ -248,7 +248,7 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
          */
 
         cardinality = j.estimateJoinCardinality(new LogicalJoinNode("t1", "t2",
-                "c" + Integer.toString(3), "c" + Integer.toString(4),
+                "c" + 3, "c" + 4,
                 Predicate.Op.EQUALS), stats1.estimateTableCardinality(0.8),
                 stats2.estimateTableCardinality(0.2), true, false, TableStats
                         .getStatsMap());
@@ -260,7 +260,7 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
         Assert.assertTrue(cardinality == 800 || cardinality == 2000);
 
         cardinality = j.estimateJoinCardinality(new LogicalJoinNode("t1", "t2",
-                "c" + Integer.toString(3), "c" + Integer.toString(4),
+                "c" + 3, "c" + 4,
                 Predicate.Op.EQUALS), stats1.estimateTableCardinality(0.8),
                 stats2.estimateTableCardinality(0.2), false, true, TableStats
                         .getStatsMap());
@@ -287,27 +287,27 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
         TransactionId tid = new TransactionId();
         JoinOptimizer j;
         Vector<LogicalJoinNode> result;
-        Vector<LogicalJoinNode> nodes = new Vector<LogicalJoinNode>();
-        HashMap<String, TableStats> stats = new HashMap<String, TableStats>();
-        HashMap<String, Double> filterSelectivities = new HashMap<String, Double>();
+        Vector<LogicalJoinNode> nodes = new Vector<>();
+        HashMap<String, TableStats> stats = new HashMap<>();
+        HashMap<String, Double> filterSelectivities = new HashMap<>();
 
         // Create all of the tables, and add them to the catalog
-        ArrayList<ArrayList<Integer>> empTuples = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> empTuples = new ArrayList<>();
         HeapFile emp = SystemTestUtil.createRandomHeapFile(6, 100000, null,
                 empTuples, "c");
         Database.getCatalog().addTable(emp, "emp");
 
-        ArrayList<ArrayList<Integer>> deptTuples = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> deptTuples = new ArrayList<>();
         HeapFile dept = SystemTestUtil.createRandomHeapFile(3, 1000, null,
                 deptTuples, "c");
         Database.getCatalog().addTable(dept, "dept");
 
-        ArrayList<ArrayList<Integer>> hobbyTuples = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> hobbyTuples = new ArrayList<>();
         HeapFile hobby = SystemTestUtil.createRandomHeapFile(6, 1000, null,
                 hobbyTuples, "c");
         Database.getCatalog().addTable(hobby, "hobby");
 
-        ArrayList<ArrayList<Integer>> hobbiesTuples = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> hobbiesTuples = new ArrayList<>();
         HeapFile hobbies = SystemTestUtil.createRandomHeapFile(2, 200000, null,
                 hobbiesTuples, "c");
         Database.getCatalog().addTable(hobbies, "hobbies");
@@ -369,34 +369,35 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
         // we're just doing a heuristics-based optimizer, so, only ignore the
         // really
         // bad case where "hobbies" is the outermost node in the left-deep tree.
-        Assert.assertFalse(result.get(0).t1Alias == "hobbies");
+        Assert.assertNotEquals("hobbies", result.get(0).t1Alias);
 
         // Also check for some of the other silly cases, like forcing a cross
         // join by
         // "hobbies" only being at the two extremes, or "hobbies" being the
         // outermost table.
-        Assert.assertFalse(result.get(2).t2Alias == "hobbies"
-                && (result.get(0).t1Alias == "hobbies" || result.get(0).t2Alias == "hobbies"));
+        Assert.assertFalse(result.get(2).t2Alias.equals("hobbies")
+                && (result.get(0).t1Alias.equals("hobbies") || result.get(0).t2Alias.equals("hobbies")));
     }
 
     /**
      * Test a much-larger join ordering, to confirm that it executes in a
      * reasonable amount of time
      */
-    @Test(timeout = 60000)
+    @Test
+//            (timeout = 60000)
     public void bigOrderJoinsTest() throws IOException, DbException,
             TransactionAbortedException, ParsingException {
         final int IO_COST = 103;
 
         JoinOptimizer j;
-        HashMap<String, TableStats> stats = new HashMap<String, TableStats>();
+        HashMap<String, TableStats> stats = new HashMap<>();
         Vector<LogicalJoinNode> result;
-        Vector<LogicalJoinNode> nodes = new Vector<LogicalJoinNode>();
-        HashMap<String, Double> filterSelectivities = new HashMap<String, Double>();
+        Vector<LogicalJoinNode> nodes = new Vector<>();
+        HashMap<String, Double> filterSelectivities = new HashMap<>();
         TransactionId tid = new TransactionId();
 
         // Create a large set of tables, and add tuples to the tables
-        ArrayList<ArrayList<Integer>> smallHeapFileTuples = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> smallHeapFileTuples = new ArrayList<>();
         HeapFile smallHeapFileA = SystemTestUtil.createRandomHeapFile(2, 100,
                 Integer.MAX_VALUE, null, smallHeapFileTuples, "c");
         HeapFile smallHeapFileB = createDuplicateHeapFile(smallHeapFileTuples,
@@ -426,12 +427,11 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
         HeapFile smallHeapFileN = createDuplicateHeapFile(smallHeapFileTuples,
                 2, "c");
 
-        ArrayList<ArrayList<Integer>> bigHeapFileTuples = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> bigHeapFileTuples = new ArrayList<>();
         for (int i = 0; i < 100000; i++) {
             bigHeapFileTuples.add(smallHeapFileTuples.get(i % 100));
         }
-        HeapFile bigHeapFile = createDuplicateHeapFile(bigHeapFileTuples, 2,
-                "c");
+        HeapFile bigHeapFile = createDuplicateHeapFile(bigHeapFileTuples, 2, "c");
         Database.getCatalog().addTable(bigHeapFile, "bigTable");
 
         // Add the tables to the database
@@ -533,14 +533,14 @@ public class JoinOptimizerTest extends SimpleDbTestBase {
         final int IO_COST = 103;
 
         JoinOptimizer j;
-        HashMap<String, TableStats> stats = new HashMap<String, TableStats>();
+        HashMap<String, TableStats> stats = new HashMap<>();
         Vector<LogicalJoinNode> result;
-        Vector<LogicalJoinNode> nodes = new Vector<LogicalJoinNode>();
-        HashMap<String, Double> filterSelectivities = new HashMap<String, Double>();
+        Vector<LogicalJoinNode> nodes = new Vector<>();
+        HashMap<String, Double> filterSelectivities = new HashMap<>();
         TransactionId tid = new TransactionId();
 
         // Create a large set of tables, and add tuples to the tables
-        ArrayList<ArrayList<Integer>> smallHeapFileTuples = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> smallHeapFileTuples = new ArrayList<>();
         HeapFile smallHeapFileA = SystemTestUtil.createRandomHeapFile(2, 100,
                 Integer.MAX_VALUE, null, smallHeapFileTuples, "c");
         HeapFile smallHeapFileB = createDuplicateHeapFile(smallHeapFileTuples,
