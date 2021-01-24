@@ -288,31 +288,26 @@ public class Parser {
         Query query = new Query(tId);
 
         LogicalPlan lp = parseQueryLogicalPlan(tId, s);
-        DbIterator physicalPlan = lp.physicalPlan(tId,
-                TableStats.getStatsMap(), explain);
+        DbIterator physicalPlan = lp.physicalPlan(tId, TableStats.getStatsMap(), explain);
         query.setPhysicalPlan(physicalPlan);
         query.setLogicalPlan(lp);
 
         if (physicalPlan != null) {
             Class<?> c;
             try {
-                c = Class.forName("simpledb.OperatorCardinality");
+                c = Class.forName("simpledb.model.OperatorCardinality");
 
                 Class<?> p = Operator.class;
                 Class<?> h = Map.class;
 
-                java.lang.reflect.Method m = c.getMethod(
-                        "updateOperatorCardinality", p, h, h);
+                java.lang.reflect.Method m = c.getMethod("updateOperatorCardinality", p, h, h);
 
                 System.out.println("The query plan is:");
-                m.invoke(null, physicalPlan,
-                        lp.getTableAliasToIdMapping(), TableStats.getStatsMap());
-                c = Class.forName("simpledb.QueryPlanVisualizer");
-                m = c.getMethod(
-                        "printQueryPlanTree", DbIterator.class, System.out.getClass());
+                m.invoke(null, physicalPlan, lp.getTableAliasToIdMapping(), TableStats.getStatsMap());
+                c = Class.forName("simpledb.model.QueryPlanVisualizer");
+                m = c.getMethod("printQueryPlanTree", DbIterator.class, System.out.getClass());
                 m.invoke(c.newInstance(), physicalPlan,System.out);
-            } catch (ClassNotFoundException | SecurityException ignored) {
-            } catch (NoSuchMethodException | IllegalArgumentException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
