@@ -119,6 +119,7 @@ public class TableStats {
         try {
             scan.open();
             // scan and updating min and max for intField
+            // 第一次全表扫描，获得每个Field的最大值和最小值，分别保存在maxs和mins数组中
             while (scan.hasNext()) {
                 this.numTuples += 1;
                 Tuple tup = scan.next();
@@ -134,6 +135,7 @@ public class TableStats {
                 }
             }
 
+            // 根据maxs和mins数组中的列的最大、最小值，创建统计柱状图
             for (int i = 0; i < numFields; ++i) {
                 if (scan.getTupleDesc().getFieldType(i) == Type.INT_TYPE) {
                     HisStats[i] = new IntHistogram(NUM_HIST_BINS, mins[i], maxs[i]);
@@ -144,6 +146,7 @@ public class TableStats {
             }
 
             scan.rewind();
+            // 第二次全表扫描，将表中的数据填充进统计柱状图中
             while (scan.hasNext()) {
                 Tuple tup = scan.next();
                 for (int i = 0; i < numFields; ++i) {

@@ -313,13 +313,11 @@ public class LogicalPlan {
             subplanMap.put(table.alias,ss);
             String baseTableName = Database.getCatalog().getTableName(table.t);
             statsMap.put(baseTableName, baseTableStats.get(baseTableName));
+            // 全表扫描的代价基数是1.0
             filterSelectivities.put(table.alias, 1.0);
-
         }
 
-        Iterator<LogicalFilterNode> filterIt = filters.iterator();        
-        while (filterIt.hasNext()) {
-            LogicalFilterNode lf = filterIt.next();
+        for (LogicalFilterNode lf : filters) {
             DbIterator subplan = subplanMap.get(lf.tableAlias);
             if (subplan == null) {
                 throw new ParsingException("Unknown table in WHERE clause " + lf.tableAlias);
@@ -328,7 +326,7 @@ public class LogicalPlan {
             Field f;
             Type ftyp;
             TupleDesc td = subplanMap.get(lf.tableAlias).getTupleDesc();
-            
+
             try {//td.fieldNameToIndex(disambiguateName(lf.fieldPureName))
                 ftyp = td.getFieldType(td.fieldNameToIndex(lf.fieldQuantifiedName));
             } catch (NoSuchElementException e) {
@@ -339,17 +337,17 @@ public class LogicalPlan {
             else
                 f = new StringField(lf.c, Type.STRING_LEN);
 
-            Predicate p = null;
+            Predicate p;
             try {
-                p = new Predicate(subplan.getTupleDesc().fieldNameToIndex(lf.fieldQuantifiedName), lf.p,f);
+                p = new Predicate(subplan.getTupleDesc().fieldNameToIndex(lf.fieldQuantifiedName), lf.p, f);
             } catch (NoSuchElementException e) {
                 throw new ParsingException("Unknown field " + lf.fieldQuantifiedName);
             }
             subplanMap.put(lf.tableAlias, new Filter(p, subplan));
 
             TableStats s = statsMap.get(Database.getCatalog().getTableName(this.getTableId(lf.tableAlias)));
-            
-            double sel= s.estimateSelectivity(subplan.getTupleDesc().fieldNameToIndex(lf.fieldQuantifiedName), lf.p, f);
+
+            double sel = s.estimateSelectivity(subplan.getTupleDesc().fieldNameToIndex(lf.fieldQuantifiedName), lf.p, f);
             filterSelectivities.put(lf.tableAlias, filterSelectivities.get(lf.tableAlias) * sel);
 
             //s.addSelectivityFactor(estimateFilterSelectivity(lf,statsMap));
@@ -359,58 +357,62 @@ public class LogicalPlan {
 
         joins = jo.orderJoins(statsMap,filterSelectivities,explain);
 
-        Iterator<LogicalJoinNode> joinIt = joins.iterator();
-        while (joinIt.hasNext()) {
-            LogicalJoinNode lj = joinIt.next();
+        for (LogicalJoinNode lj : joins) {
             DbIterator plan1;
             DbIterator plan2;
             boolean isSubqueryJoin = lj instanceof LogicalSubplanJoinNode;
             String t1name, t2name;
 
-            if (equivMap.get(lj.t1Alias)!=null)
+            if (equivMap.get(lj.t1Alias) != null) {
                 t1name = equivMap.get(lj.t1Alias);
-            else
+            }
+            else {
                 t1name = lj.t1Alias;
+            }
 
-            if (equivMap.get(lj.t2Alias)!=null)
+            if (equivMap.get(lj.t2Alias) != null) {
                 t2name = equivMap.get(lj.t2Alias);
-            else
+            }
+            else {
                 t2name = lj.t2Alias;
+            }
 
             plan1 = subplanMap.get(t1name);
 
             if (isSubqueryJoin) {
-                plan2 = ((LogicalSubplanJoinNode)lj).subPlan;
-                if (plan2 == null) 
+                plan2 = ((LogicalSubplanJoinNode) lj).subPlan;
+                if (plan2 == null) {
                     throw new ParsingException("Invalid subquery.");
-            } else { 
+                }
+            } else {
                 plan2 = subplanMap.get(t2name);
             }
-            
-            if (plan1 == null)
+
+            if (plan1 == null) {
                 throw new ParsingException("Unknown table in WHERE clause " + lj.t1Alias);
-            if (plan2 == null)
+            }
+            if (plan2 == null) {
                 throw new ParsingException("Unknown table in WHERE clause " + lj.t2Alias);
-            
+            }
+
             DbIterator j;
-            j = JoinOptimizer.instantiateJoin(lj,plan1,plan2);
+            j = JoinOptimizer.instantiateJoin(lj, plan1, plan2);
             subplanMap.put(t1name, j);
 
             if (!isSubqueryJoin) {
                 subplanMap.remove(t2name);
-                equivMap.put(t2name,t1name);  //keep track of the fact that this new node contains both tables
-                    //make sure anything that was equiv to lj.t2 (which we are just removed) is
-                    // marked as equiv to lj.t1 (which we are replacing lj.t2 with.)
-                    for (Map.Entry<String, String> s: equivMap.entrySet()) {
-                        String val = s.getValue();
-                        if (val.equals(t2name)) {
-                            s.setValue(t1name);
-                        }
+                equivMap.put(t2name, t1name);  //keep track of the fact that this new node contains both tables
+                //make sure anything that was equiv to lj.t2 (which we are just removed) is
+                // marked as equiv to lj.t1 (which we are replacing lj.t2 with.)
+                for (Map.Entry<String, String> s : equivMap.entrySet()) {
+                    String val = s.getValue();
+                    if (val.equals(t2name)) {
+                        s.setValue(t1name);
                     }
-                    
+                }
+
                 // subplanMap.put(lj.t2, j);
             }
-            
         }
 
         if (subplanMap.size() > 1) {
@@ -427,22 +429,19 @@ public class LogicalPlan {
             if (si.aggOp != null) {
                 outFields.add(groupByField!=null?1:0);
                 TupleDesc td = node.getTupleDesc();
-//                int  id;
                 try {
-//                    id = 
                     td.fieldNameToIndex(si.fname);
                 } catch (NoSuchElementException e) {
                     throw new ParsingException("Unknown field " +  si.fname + " in SELECT list");
                 }
                 outTypes.add(Type.INT_TYPE);  //the type of all aggregate functions is INT
-
             } else if (hasAgg) {
                     if (groupByField == null) {
                         throw new ParsingException("Field " + si.fname + " does not appear in GROUP BY list");
                     }
                     outFields.add(0);
                     TupleDesc td = node.getTupleDesc();
-                    int  id;
+                    int id;
                     try {
                         id = td.fieldNameToIndex(groupByField);
                     } catch (NoSuchElementException e) {
@@ -465,7 +464,6 @@ public class LogicalPlan {
                     }
                     outFields.add(id);
                     outTypes.add(td.getFieldType(id));
-
                 }
         }
 
@@ -473,10 +471,8 @@ public class LogicalPlan {
             TupleDesc td = node.getTupleDesc();
             Aggregate aggNode;
             try {
-                aggNode = new Aggregate(node,
-                                        td.fieldNameToIndex(aggField),
-                                        groupByField == null?Aggregator.NO_GROUPING:td.fieldNameToIndex(groupByField),
-                                getAggOp(aggOp));
+                aggNode = new Aggregate(node, td.fieldNameToIndex(aggField),
+                        groupByField == null ? Aggregator.NO_GROUPING:td.fieldNameToIndex(groupByField), getAggOp(aggOp));
             } catch (NoSuchElementException | IllegalArgumentException e) {
                 throw new ParsingException(e);
             }

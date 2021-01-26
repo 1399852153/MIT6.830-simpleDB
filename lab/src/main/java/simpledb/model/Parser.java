@@ -142,8 +142,7 @@ public class Parser {
 
     }
 
-    public LogicalPlan parseQueryLogicalPlan(TransactionId tid, ZQuery q)
-            throws IOException, Zql.ParseException, ParsingException {
+    public LogicalPlan parseQueryLogicalPlan(TransactionId tid, ZQuery q) throws IOException, Zql.ParseException, ParsingException {
         @SuppressWarnings("unchecked")
         Vector<ZFromItem> from = q.getFrom();
         LogicalPlan lp = new LogicalPlan();
@@ -152,42 +151,33 @@ public class Parser {
         for (int i = 0; i < from.size(); i++) {
             ZFromItem fromIt = from.elementAt(i);
             try {
-
-                int id = Database.getCatalog().getTableId(fromIt.getTable()); // will
-                                                                              // fall
-                                                                              // through
-                                                                              // if
-                                                                              // table
-                                                                              // doesn't
-                                                                              // exist
+                // will fall through if table doesn't exist
+                int id = Database.getCatalog().getTableId(fromIt.getTable());
                 String name;
 
-                if (fromIt.getAlias() != null)
+                if (fromIt.getAlias() != null) {
                     name = fromIt.getAlias();
-                else
+                }
+                else {
                     name = fromIt.getTable();
-
+                }
                 lp.addScan(id, name);
 
                 // XXX handle subquery?
             } catch (NoSuchElementException e) {
                 e.printStackTrace();
-                throw new ParsingException("Table "
-                        + fromIt.getTable() + " is not in catalog");
+                throw new ParsingException("Table " + fromIt.getTable() + " is not in catalog");
             }
         }
 
         // now parse the where clause, creating Filter and Join nodes as needed
         ZExp w = q.getWhere();
         if (w != null) {
-
             if (!(w instanceof ZExpression)) {
-                throw new ParsingException(
-                        "Nested queries are currently unsupported.");
+                throw new ParsingException("Nested queries are currently unsupported.");
             }
             ZExpression wx = (ZExpression) w;
             processExpression(tid, wx, lp);
-
         }
 
         // now look for group by fields
@@ -197,15 +187,12 @@ public class Parser {
             @SuppressWarnings("unchecked")
             Vector<ZExp> gbs = gby.getGroupBy();
             if (gbs.size() > 1) {
-                throw new ParsingException(
-                        "At most one grouping field expression supported.");
+                throw new ParsingException("At most one grouping field expression supported.");
             }
             if (gbs.size() == 1) {
                 ZExp gbe = gbs.elementAt(0);
                 if (!(gbe instanceof ZConstant)) {
-                    throw new ParsingException(
-                            "Complex grouping expressions (" + gbe
-                                    + ") not supported.");
+                    throw new ParsingException("Complex grouping expressions (" + gbe + ") not supported.");
                 }
                 groupByField = ((ZConstant) gbe).getValue();
                 System.out.println("GROUP BY FIELD : " + groupByField);
@@ -222,29 +209,21 @@ public class Parser {
 
         for (int i = 0; i < selectList.size(); i++) {
             ZSelectItem si = selectList.elementAt(i);
-            if (si.getAggregate() == null
-                    && (si.isExpression() && !(si.getExpression() instanceof ZConstant))) {
-                throw new ParsingException(
-                        "Expressions in SELECT list are not supported.");
+            if (si.getAggregate() == null && (si.isExpression() && !(si.getExpression() instanceof ZConstant))) {
+                throw new ParsingException("Expressions in SELECT list are not supported.");
             }
             if (si.getAggregate() != null) {
                 if (aggField != null) {
-                    throw new ParsingException(
-                            "Aggregates over multiple fields not supported.");
+                    throw new ParsingException("Aggregates over multiple fields not supported.");
                 }
-                aggField = ((ZConstant) ((ZExpression) si.getExpression())
-                        .getOperand(0)).getValue();
+                aggField = ((ZConstant) ((ZExpression) si.getExpression()).getOperand(0)).getValue();
                 aggFun = si.getAggregate();
-                System.out.println("Aggregate field is " + aggField
-                        + ", agg fun is : " + aggFun);
+                System.out.println("Aggregate field is " + aggField + ", agg fun is : " + aggFun);
                 lp.addProjectField(aggField, aggFun);
             } else {
                 if (groupByField != null
-                        && !(groupByField.equals(si.getTable() + "."
-                                + si.getColumn()) || groupByField.equals(si.getColumn()))) {
-                    throw new ParsingException("Non-aggregate field "
-                            + si.getColumn()
-                            + " does not appear in GROUP BY list.");
+                        && !(groupByField.equals(si.getTable() + "." + si.getColumn()) || groupByField.equals(si.getColumn()))) {
+                    throw new ParsingException("Non-aggregate field " + si.getColumn() + " does not appear in GROUP BY list.");
                 }
                 lp.addProjectField(si.getTable() + "." + si.getColumn(), null);
             }
@@ -258,23 +237,19 @@ public class Parser {
             lp.addAggregate(aggFun, aggField, groupByField);
         }
         // sort the data
-
         if (q.getOrderBy() != null) {
             @SuppressWarnings("unchecked")
             Vector<ZOrderBy> obys = q.getOrderBy();
             if (obys.size() > 1) {
-                throw new ParsingException(
-                        "Multi-attribute ORDER BY is not supported.");
+                throw new ParsingException("Multi-attribute ORDER BY is not supported.");
             }
             ZOrderBy oby = obys.elementAt(0);
             if (!(oby.getExpression() instanceof ZConstant)) {
-                throw new ParsingException(
-                        "Complex ORDER BY's are not supported");
+                throw new ParsingException("Complex ORDER BY's are not supported");
             }
             ZConstant f = (ZConstant) oby.getExpression();
 
             lp.addOrderBy(f.getValue(), oby.getAscOrder());
-
         }
         return lp;
     }
@@ -287,7 +262,9 @@ public class Parser {
             ParsingException, Zql.ParseException {
         Query query = new Query(tId);
 
+        // 根据ZQuery获得逻辑上，未优化的查询计划
         LogicalPlan lp = parseQueryLogicalPlan(tId, s);
+        // 将未优化的查询计划转化为优化后的最终执行的物理查询计划
         DbIterator physicalPlan = lp.physicalPlan(tId, TableStats.getStatsMap(), explain);
         query.setPhysicalPlan(physicalPlan);
         query.setLogicalPlan(lp);

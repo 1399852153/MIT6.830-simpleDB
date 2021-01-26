@@ -327,20 +327,19 @@ public class JoinOptimizer {
 
         Vector<LogicalJoinNode> prevBest;
 
-        if (this.p.getTableId(j.t1Alias) == null)
+        if (this.p.getTableId(j.t1Alias) == null) {
             throw new ParsingException("Unknown table " + j.t1Alias);
-        if (this.p.getTableId(j.t2Alias) == null)
+        }
+        if (this.p.getTableId(j.t2Alias) == null) {
             throw new ParsingException("Unknown table " + j.t2Alias);
+        }
 
-        String table1Name = Database.getCatalog().getTableName(
-                this.p.getTableId(j.t1Alias));
-        String table2Name = Database.getCatalog().getTableName(
-                this.p.getTableId(j.t2Alias));
+        String table1Name = Database.getCatalog().getTableName(this.p.getTableId(j.t1Alias));
+        String table2Name = Database.getCatalog().getTableName(this.p.getTableId(j.t2Alias));
         String table1Alias = j.t1Alias;
         String table2Alias = j.t2Alias;
 
-        Set<LogicalJoinNode> news = (Set<LogicalJoinNode>) ((HashSet<LogicalJoinNode>) joinSet)
-                .clone();
+        Set<LogicalJoinNode> news = (Set<LogicalJoinNode>) ((HashSet<LogicalJoinNode>) joinSet).clone();
         news.remove(j);
 
         double t1cost, t2cost;
@@ -350,17 +349,12 @@ public class JoinOptimizer {
         if (news.isEmpty()) { // base case -- both are base relations
             prevBest = new Vector<>();
             t1cost = stats.get(table1Name).estimateScanCost();
-            t1card = stats.get(table1Name).estimateTableCardinality(
-                    filterSelectivities.get(j.t1Alias));
+            t1card = stats.get(table1Name).estimateTableCardinality(filterSelectivities.get(j.t1Alias));
             leftPkey = isPkey(j.t1Alias, j.f1PureName);
 
-            t2cost = table2Alias == null ? 0 : stats.get(table2Name)
-                    .estimateScanCost();
-            t2card = table2Alias == null ? 0 : stats.get(table2Name)
-                    .estimateTableCardinality(
-                            filterSelectivities.get(j.t2Alias));
-            rightPkey = table2Alias == null ? false : isPkey(table2Alias,
-                    j.f2PureName);
+            t2cost = table2Alias == null ? 0 : stats.get(table2Name).estimateScanCost();
+            t2card = table2Alias == null ? 0 : stats.get(table2Name).estimateTableCardinality(filterSelectivities.get(j.t2Alias));
+            rightPkey = table2Alias != null && isPkey(table2Alias, j.f2PureName);
         } else {
             // news is not empty -- figure best way to join j to news
             prevBest = pc.getOrder(news);
@@ -382,24 +376,17 @@ public class JoinOptimizer {
                 t1card = bestCard;
                 leftPkey = hasPkey(prevBest);
 
-                t2cost = j.t2Alias == null ? 0 : stats.get(table2Name)
-                        .estimateScanCost();
-                t2card = j.t2Alias == null ? 0 : stats.get(table2Name)
-                        .estimateTableCardinality(
-                                filterSelectivities.get(j.t2Alias));
-                rightPkey = j.t2Alias == null ? false : isPkey(j.t2Alias,
-                        j.f2PureName);
-            } else if (doesJoin(prevBest, j.t2Alias)) { // j.t2 is in prevbest
-                                                        // (both
-                // shouldn't be)
+                t2cost = j.t2Alias == null ? 0 : stats.get(table2Name).estimateScanCost();
+                t2card = j.t2Alias == null ? 0 : stats.get(table2Name).estimateTableCardinality(filterSelectivities.get(j.t2Alias));
+                rightPkey = j.t2Alias != null && isPkey(j.t2Alias, j.f2PureName);
+            } else if (doesJoin(prevBest, j.t2Alias)) { // j.t2 is in prevbest (both shouldn't be)
                 t2cost = prevBestCost; // left side just has cost of whatever
                                        // left
                 // subtree is
                 t2card = bestCard;
                 rightPkey = hasPkey(prevBest);
                 t1cost = stats.get(table1Name).estimateScanCost();
-                t1card = stats.get(table1Name).estimateTableCardinality(
-                        filterSelectivities.get(j.t1Alias));
+                t1card = stats.get(table1Name).estimateTableCardinality(filterSelectivities.get(j.t1Alias));
                 leftPkey = isPkey(j.t1Alias, j.f1PureName);
 
             } else {
@@ -422,13 +409,13 @@ public class JoinOptimizer {
             rightPkey = leftPkey;
             leftPkey = tmp;
         }
-        if (cost1 >= bestCostSoFar)
+        if (cost1 >= bestCostSoFar) {
             return null;
+        }
 
         CostCard cc = new CostCard();
 
-        cc.card = estimateJoinCardinality(j, t1card, t2card, leftPkey,
-                rightPkey, stats);
+        cc.card = estimateJoinCardinality(j, t1card, t2card, leftPkey, rightPkey, stats);
         cc.cost = cost1;
         cc.plan = (Vector<LogicalJoinNode>) prevBest.clone();
         cc.plan.addElement(j); // prevbest is left -- add new join to end
@@ -441,8 +428,7 @@ public class JoinOptimizer {
      */
     private boolean doesJoin(Vector<LogicalJoinNode> joinlist, String table) {
         for (LogicalJoinNode j : joinlist) {
-            if (j.t1Alias.equals(table)
-                    || (j.t2Alias != null && j.t2Alias.equals(table)))
+            if (j.t1Alias.equals(table) || (j.t2Alias != null && j.t2Alias.equals(table)))
                 return true;
         }
         return false;
@@ -470,8 +456,7 @@ public class JoinOptimizer {
      */
     private boolean hasPkey(Vector<LogicalJoinNode> joinlist) {
         for (LogicalJoinNode j : joinlist) {
-            if (isPkey(j.t1Alias, j.f1PureName)
-                    || (j.t2Alias != null && isPkey(j.t2Alias, j.f2PureName)))
+            if (isPkey(j.t1Alias, j.f1PureName) || (j.t2Alias != null && isPkey(j.t2Alias, j.f2PureName)))
                 return true;
         }
         return false;
