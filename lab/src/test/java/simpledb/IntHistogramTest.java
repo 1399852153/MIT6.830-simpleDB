@@ -27,7 +27,7 @@ public class IntHistogramTest {
 		// Try printing out all of the values; make sure "estimateSelectivity()"
 		// cause any problems
 		double selectivity = 0.0;
-		for (int c = 0; c < 10; c++) {
+		for (int c = 0; c < 100; c++) {
 			selectivity += h.estimateSelectivity(Op.EQUALS, c);
 		}
 		
