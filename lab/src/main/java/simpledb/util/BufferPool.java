@@ -370,10 +370,6 @@ public class BufferPool {
             throws IOException {
         // some code goes here
         // not necessary for lab1|lab2
-        if (commit) {
-            // flush all the pages into disk
-            flushPages(tid);
-        }
 
         // abort and commited, discard all the pages
         // just invalidate all the pages in tid
@@ -383,9 +379,16 @@ public class BufferPool {
         if (lockList != null) {
             for (PageId pid : lockList) {
                 Page pg = pgBufferPool.getOrDefault(pid, null);
-                if (pg != null && pg.isDirty() != null) {
-                    // all dirty pages are flushed and not dirty page are still in cache
-                    discardPage(pid);
+                if (pg != null) {
+                    if (commit) {
+                        flushPage(pg.getId());
+                        pg.setBeforeImage();
+                        //TODO commit log ?????
+                    } else if (pg.isDirty() != null){
+                        // all dirty pages are flushed and not dirty page are still in cache
+                        // discard
+                        discardPage(pid);
+                    }
                 }
             }
         }
@@ -487,12 +490,20 @@ public class BufferPool {
         // some code goes here
         // not necessary for lab1
         if (pgBufferPool.containsKey(pid)) {
-            Page pg = pgBufferPool.get(pid);
-            if (pg.isDirty() != null) {
+            Page p = pgBufferPool.get(pid);
+            TransactionId dirtier = p.isDirty();
+            if (dirtier != null) {
+                /*
+                    append an update record to the log, with
+                    a before-image and after-image.
+                */
+                Database.getLogFile().logWrite(dirtier, p.getBeforeImage(), p);
+                Database.getLogFile().force();
+
                 // then write back
-                DbFile tb = Database.getCatalog().getDatabaseFile(pg.getId().getTableId());
-                tb.writePage(pg);
-                pg.markDirty(false, null);
+                DbFile tb = Database.getCatalog().getDatabaseFile(p.getId().getTableId());
+                p.markDirty(false, null);
+                tb.writePage(p);
             }
         }
     }
