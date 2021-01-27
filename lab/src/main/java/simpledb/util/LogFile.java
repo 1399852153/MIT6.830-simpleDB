@@ -294,16 +294,7 @@ public class LogFile {
             newPage = (Page)pageConsts[0].newInstance(pageArgs);
 
             //            Debug.log("READ PAGE OF TYPE " + pageClassName + ", table = " + newPage.getId().getTableId() + ", page = " + newPage.getId().pageno());
-        } catch (ClassNotFoundException e){
-            e.printStackTrace();
-            throw new IOException();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-            throw new IOException();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            throw new IOException();
-        } catch (InvocationTargetException e) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException e){
             e.printStackTrace();
             throw new IOException();
         }
@@ -319,7 +310,7 @@ public class LogFile {
         throws IOException {
         Debug.log("BEGIN");
         if(tidToFirstLogRecord.get(tid.getId()) != null){
-            System.err.printf("logXactionBegin: already began this tid\n");
+            System.err.print("logXactionBegin: already began this tid\n");
             throw new IOException("double logXactionBegin()");
         }
         preAppend();
