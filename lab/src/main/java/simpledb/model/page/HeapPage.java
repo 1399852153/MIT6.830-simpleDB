@@ -390,7 +390,7 @@ public class HeapPage implements Page {
         }
     }
 
-    protected class HeapPageTupleIterator implements Iterator {
+    protected class HeapPageTupleIterator implements Iterator<Tuple> {
         private final Iterator<Tuple> iter;
         public HeapPageTupleIterator() {
             ArrayList<Tuple> tupleArrayList = new ArrayList<>(numSlots);

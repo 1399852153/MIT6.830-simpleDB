@@ -227,7 +227,9 @@ public class LogFile {
         raf.writeLong(tid.getId());
 
         writePageData(raf,before);
+        Debug.log("WRITE OFFSET = " + raf.getFilePointer());
         writePageData(raf,after);
+        Debug.log("WRITE OFFSET = " + raf.getFilePointer());
         raf.writeLong(currentOffset);
         currentOffset = raf.getFilePointer();
 
@@ -236,7 +238,7 @@ public class LogFile {
 
     void writePageData(RandomAccessFile raf, Page p) throws IOException{
         PageId pid = p.getId();
-        int pageInfo[] = pid.serialize();
+        int[] pageInfo = pid.serialize();
 
         //page data is:
         // page class name
@@ -275,7 +277,7 @@ public class LogFile {
 
             Constructor<?>[] idConsts = idClass.getDeclaredConstructors();
             int numIdArgs = raf.readInt();
-            Object idArgs[] = new Object[numIdArgs];
+            Object[] idArgs = new Object[numIdArgs];
             for (int i = 0; i<numIdArgs;i++) {
                 idArgs[i] = raf.readInt();
             }
@@ -670,7 +672,7 @@ public class LogFile {
                                 raf.seek(raf.getFilePointer() + LONG_SIZE);
 
                                 int numActiveTransactions = raf.readInt();
-                                iter = raf.getFilePointer() + numActiveTransactions * LONG_SIZE * 2;
+                                iter = raf.getFilePointer() + (long) numActiveTransactions * LONG_SIZE * 2;
                                 break;
                             default:
                                 System.out.println("type: " + type);

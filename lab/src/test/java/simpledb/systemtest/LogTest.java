@@ -17,6 +17,7 @@ import simpledb.util.Utility;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -37,7 +38,7 @@ public class LogTest extends SimpleDbTestBase {
         Tuple value = new Tuple(twoIntColumns);
         value.setField(0, new IntField(v1));
         value.setField(1, new IntField(v2));
-        TupleIterator insertRow = new TupleIterator(Utility.getTupleDesc(2), Arrays.asList(new Tuple[]{value}));
+        TupleIterator insertRow = new TupleIterator(Utility.getTupleDesc(2), Collections.singletonList(value));
 
         // Insert the row
         Insert insert = new Insert(t.getId(), insertRow, hf.getId());
@@ -66,7 +67,7 @@ public class LogTest extends SimpleDbTestBase {
             throw new RuntimeException("LogTest: tuple repeated");
         if(present && count < 1)
             throw new RuntimeException("LogTest: tuple missing");
-        if(present == false && count > 0)
+        if(!present && count > 0)
             throw new RuntimeException("LogTest: tuple present but shouldn't be");
     }
 
@@ -75,11 +76,13 @@ public class LogTest extends SimpleDbTestBase {
         throws DbException, TransactionAbortedException, IOException {
         Transaction t = new Transaction();
         t.start();
-        if(t1 != -1)
+        if(t1 != -1) {
             insertRow(hf, t, t1, 0);
+        }
         Database.getBufferPool().flushAllPages();
-        if(t2 != -1)
+        if(t2 != -1) {
             insertRow(hf, t, t2, 0);
+        }
         t.commit();
     }
 
@@ -146,8 +149,9 @@ public class LogTest extends SimpleDbTestBase {
         // check that BufferPool.flushPage() calls LogFile.logWrite().
         doInsert(hf1, 1, 2);
 
-        if(Database.getLogFile().getTotalRecords() != 4)
+        if(Database.getLogFile().getTotalRecords() != 4) {
             throw new RuntimeException("LogTest: wrong # of log records; patch failed?");
+        }
 
         // *** Test:
         // check that BufferPool.transactionComplete(commit=true)
@@ -158,9 +162,9 @@ public class LogTest extends SimpleDbTestBase {
                                                   new HeapPageId(hf1.getId(), 0),
                                                   Permissions.READ_ONLY);
         Page p1 = p.getBeforeImage();
-        Boolean same = Arrays.equals(p.getPageData(),
+        boolean same = Arrays.equals(p.getPageData(),
                                      p1.getPageData());
-        if(same == false)
+        if(!same)
             throw new RuntimeException("LogTest:setBeforeImage() not called? patch failed?");
     }
 
