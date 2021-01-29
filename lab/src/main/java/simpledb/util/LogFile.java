@@ -160,7 +160,7 @@ public class LogFile {
         synchronized (Database.getBufferPool()) {
 
             synchronized(this) {
-                Debug.log("ABORT");
+                Debug.log("ABORT " + tid);
                 //should we verify that this is a live transaction?
 
                 // must do this here, since rollback only works for
@@ -310,7 +310,7 @@ public class LogFile {
     */
     public synchronized  void logXactionBegin(TransactionId tid)
         throws IOException {
-        Debug.log("BEGIN");
+        Debug.log("BEGIN " + tid);
         if(tidToFirstLogRecord.get(tid.getId()) != null){
             System.err.print("logXactionBegin: already began this tid\n");
             throw new IOException("double logXactionBegin()");
@@ -500,8 +500,11 @@ public class LogFile {
             switch (type) {
                 case UPDATE_RECORD:
                     record_tid = raf.readLong();
+                    // 从事务的起始点开始，遍历每一条update类型的日志记录
                     if (record_tid == tid) {
+                        // 如果是当前需要回滚事务所属的update日志
                         Page before = this.readPageData(raf);
+                        // 通过before快照进行回滚，并强制令内存中的对应页失效（由于需要回滚，内存中的页可能已经是脏页了）
                         Database.getCatalog().getDatabaseFile(before.getId().getTableId()).writePage(before);
                         Database.getBufferPool().discardPage(before.getId());
                         break;
@@ -571,6 +574,7 @@ public class LogFile {
                     // analyse stage
 
                     // backward start from last record
+                    // 从最后一条记录开始，回溯直到最后的检查点位置
                     while (iter >= lastCheckPoint) {
                         raf.seek(iter);
                         int type = raf.readInt();
@@ -581,10 +585,12 @@ public class LogFile {
                             case ABORT_RECORD:
                                 break;
                             case COMMIT_RECORD:
+                                // commit日志收集起来
                                 record_tid = raf.readLong();
                                 commits.add(record_tid);
                                 break;
                             case BEGIN_RECORD:
+                                // begin日志收集起来
                                 record_tid = raf.readLong();
                                 transactions.add(record_tid);
                                 break;
@@ -599,11 +605,13 @@ public class LogFile {
                                     // add active transactions
                                     record_tid = raf.readLong();
                                     long first_pos = raf.readLong();
+                                    // 活跃的事务
                                     transactions.add(record_tid);
                                     tidToFirstLogRecord.put(record_tid, first_pos);
                                 }
                                 break;
                             default:
+                                // 未知的记录类型，报错
                                 System.out.print(iter);
                                 System.out.println("myType: " + type);
                                 throw new IOException("analysis");

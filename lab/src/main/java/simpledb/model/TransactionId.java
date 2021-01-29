@@ -30,4 +30,11 @@ public class TransactionId implements Serializable {
     public int hashCode() {
         return (int) myid;
     }
+
+    @Override
+    public String toString() {
+        return "TransactionId{" +
+                "myid=" + myid +
+                '}';
+    }
 }

@@ -183,8 +183,9 @@ public class LogTest extends SimpleDbTestBase {
         Database.getBufferPool().flushAllPages();
         HeapPage xp2 = (HeapPage) hf1.readPage(new HeapPageId(hf1.getId(), 0));
 
-        if(xp1.getNumEmptySlots() == xp2.getNumEmptySlots())
+        if(xp1.getNumEmptySlots() == xp2.getNumEmptySlots()) {
             throw new RuntimeException("LogTest: flushAllPages() had no effect");
+        }
     }
 
     @Test public void TestCommitCrash()
