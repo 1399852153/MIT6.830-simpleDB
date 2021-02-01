@@ -359,15 +359,17 @@ public class LogFile {
                 raf.seek(endCpOffset);
                 raf.writeLong(currentOffset);
                 currentOffset = raf.getFilePointer();
-                //Debug.log("CP OFFSET = " + currentOffset);
+                Debug.log("CP OFFSET = " + currentOffset);
             }
         }
 
         logTruncate();
     }
 
-    /** Truncate any unneeded portion of the log to reduce its space
-        consumption */
+    /**
+     * Truncate any unneeded portion of the log to reduce its space consumption
+     * 删除不必要的日志来减少空间消耗
+     */
     public synchronized void logTruncate() throws IOException {
         preAppend();
         raf.seek(0);
@@ -391,7 +393,7 @@ public class LogFile {
                 @SuppressWarnings("unused")
                 long tid = raf.readLong();
                 long firstLogRecord = raf.readLong();
-                if (firstLogRecord < minLogRecord) {
+                if (firstLogRecord < minLogRecord) { // 比较出检查点记录的活跃事务中，起始点最早的位置
                     minLogRecord = firstLogRecord;
                 }
             }
@@ -402,7 +404,7 @@ public class LogFile {
         RandomAccessFile logNew = new RandomAccessFile(newFile, "rw");
         logNew.seek(0);
         logNew.writeLong((cpLoc - minLogRecord) + LONG_SIZE);
-
+        // 跳转到当前检查点包含的活跃事务中，最早的起始点位置
         raf.seek(minLogRecord);
 
         //have to rewrite log records since offsets are different after truncation
