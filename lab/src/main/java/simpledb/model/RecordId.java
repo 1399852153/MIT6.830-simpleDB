@@ -77,4 +77,11 @@ public class RecordId implements Serializable {
                 .hashCode();
     }
 
+    @Override
+    public String toString() {
+        return "RecordId{" +
+                "pageId=" + pageId +
+                ", tupleNo=" + tupleNo +
+                '}';
+    }
 }

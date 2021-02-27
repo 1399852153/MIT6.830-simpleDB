@@ -345,7 +345,7 @@ public class BTreeFile implements DbFile {
         parent.insertEntry(newParentEntry);
         // set dirtypages and old sibs
         if (oldRightSibId != null) {
-            BTreeLeafPage oldRightSib = (BTreeLeafPage) getPage(tid, dirtypages, page.getRightSiblingId(), Permissions.READ_WRITE);
+            BTreeLeafPage oldRightSib = (BTreeLeafPage) getPage(tid, dirtypages, oldRightSibId, Permissions.READ_WRITE);
             oldRightSib.setLeftSiblingId(newRightSib.getId());
             dirtypages.put(oldRightSib.getId(), oldRightSib);
         }
